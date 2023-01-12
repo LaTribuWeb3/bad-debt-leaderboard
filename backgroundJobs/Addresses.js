@@ -120,7 +120,7 @@ const creamAddress = { "BSC" : { "comptroller" : "0x589DE0F0Ccf905477646599bb3E5
 
 const aaveAddress =
 { "ETH":
-    { "lendingPoolAddressesProviderAddress" : "0xB53C1a33016B2DC2fF3653530bfF1848a515c8c5", "deployBlock" : 11362579, "blockStepInInit" : 5000,   "multicallSize" : 200 }
+    { "lendingPoolAddressesProviderAddress" : "0xB53C1a33016B2DC2fF3653530bfF1848a515c8c5", "deployBlock" : 11362579, "blockStepInInit" : 10000,   "multicallSize" : 400 }
 }
 
 const agaveAddress =
@@ -128,14 +128,14 @@ const agaveAddress =
     { "lendingPoolAddressesProviderAddress" : "0x3673C22153E363B1da69732c4E0aA71872Bbb87F",
       "deployBlock" : 21726232,
       "blockStepInInit" : 100000,
-      "multicallSize" : 200 }
+      "multicallSize" : 400 }
 }
 
 
 
 const granaryAddress =
 { "FTM":
-    { "lendingPoolAddressesProviderAddress" : "0x8b9D58E2Dc5e9b5275b62b1F30b3c0AC87138130", "deployBlock" : 32461920, "blockStepInInit" : 100000,   "multicallSize" : 200 }
+    { "lendingPoolAddressesProviderAddress" : "0x8b9D58E2Dc5e9b5275b62b1F30b3c0AC87138130", "deployBlock" : 32461920, "blockStepInInit" : 100000,   "multicallSize" : 400 }
 }
 
 const tectonicAddress = { "CRO" : { "comptroller" : "0xb3831584acb95ED9cCb0C11f677B5AD01DeaeEc0", "cETH" : "0xeAdf7c01DA7E93FdB5f16B0aa9ee85f978e89E95",    
@@ -149,7 +149,7 @@ const aaveV3Configuration =
 	"AVAX": {
 		"poolAddressesProviderRegistry": "0x770ef9f4fe897e59daCc474EF11238303F9552b6",
 		"deployBlock": 11970175,
-		"blockStepInInit": 10000,
+		"blockStepInInit": 5000,
         "firstEventBlock": 12027175,
 		"multicallSize": 200
 	},

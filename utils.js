@@ -1,3 +1,4 @@
+const fs = require('fs');
 const MAX_RETRIES = 10
 
 const sleep = async seconds => {
@@ -36,7 +37,50 @@ const halfHour = 1000 * 60 * 30
   }
 }
 
+
+
+function loadUserListFromDisk(fileName) {
+  if(!fs.existsSync('saved_data')) {
+      fs.mkdirSync('saved_data');
+  }
+
+  if(fs.existsSync(`saved_data/${fileName}`)) {
+      const savedData = JSON.parse(fs.readFileSync(`saved_data/${fileName}`));
+      if(savedData.lastFetchedBlock && savedData.users) {
+          const firstBlockToFetch = savedData.lastFetchedBlock +1;
+          const userList = savedData.users;
+          console.log(`loadUserListFromDisk: Loaded user list from disk, next block to fetch: ${firstBlockToFetch}. Current userList.length: ${userList.length}.`)
+          return {
+            firstBlockToFetch: firstBlockToFetch,
+            userList: userList
+          };
+      }
+
+  } else {
+      console.log(`loadUserListFromDisk: Could not find saved data file saved_data/${fileName}, will fetch data from the begining`)
+  }
+  
+  return undefined;
+
+}
+
+function saveUserListToDisk(fileName, userList, lastFetchedBlock) {
+  if(!fs.existsSync('saved_data')) {
+    fs.mkdirSync('saved_data');
+  }
+
+  const savedUserData = {
+    lastFetchedBlock: lastFetchedBlock,
+    users: userList
+  };
+
+  console.log(`saveUserListToDisk: Saving ${userList.length} users to file ${fileName}`);
+  fs.writeFileSync(`saved_data/${fileName}`, JSON.stringify(savedUserData));
+}
+
 module.exports = { 
   sleep,
-  retry
+  retry,
+  loadUserListFromDisk,
+  saveUserListToDisk
 }

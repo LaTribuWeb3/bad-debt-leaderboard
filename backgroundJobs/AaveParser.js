@@ -4,10 +4,11 @@ const Addresses = require("./Addresses.js")
 const { getPrice, getEthPrice, getCTokenPriceFromZapper } = require('./priceFetcher')
 const User = require("./User.js")
 const {waitForCpuToGoBelowThreshold} = require("../machineResources")
-const {retry} = require("../utils")
+const {retry, loadUserListFromDisk, saveUserListToDisk, sleep} = require("../utils")
+let LOAD_USERS_FROM_DISK = process.env.LOAD_USER_FROM_DISK && process.env.LOAD_USER_FROM_DISK.toLowerCase() == 'true';
 
 class Aave {
-    constructor(AaveInfo, network, web3, heavyUpdateInterval = 24) {
+    constructor(AaveInfo, network, web3, heavyUpdateInterval = 24, fetchDelayInHours = 1, userFileName = undefined) {
       this.web3 = web3
       this.network = network
       this.lendingPoolAddressesProvider = new web3.eth.Contract(Addresses.lendingPoolAddressesProviderAbi, AaveInfo[network].lendingPoolAddressesProviderAddress)
@@ -31,6 +32,11 @@ class Aave {
       this.totalBorrows = toBN("0")
 
       this.output = {}
+      this.fetchDelayInHours = fetchDelayInHours;
+      this.userFileName = userFileName;
+      if(this.userFileName == undefined) {
+        LOAD_USERS_FROM_DISK = false;
+      }
     }
 
     async initPrices() {
@@ -43,7 +49,13 @@ class Aave {
     }
 
     async heavyUpdate() {
-        if(this.userList.length == 0) await this.collectAllUsers()
+        if(this.userList.length == 0
+        // if load users from disk, collect all users each time heavy update is called 
+        // even is there is already some user in the user list
+        // it does not take too much time to fetch new users that way
+        || LOAD_USERS_FROM_DISK) {
+            await this.collectAllUsers();
+    }
         await this.updateAllUsers()
     }
 
@@ -144,25 +156,49 @@ class Aave {
     async collectAllUsers() {
         const currBlock = /*this.deployBlock + 5000 * 5 //*/ await this.web3.eth.getBlockNumber() - 10
         console.log({currBlock})
-        for(let startBlock = this.deployBlock ; startBlock < currBlock ; startBlock += this.blockStepInInit) {
-            console.log({startBlock}, this.userList.length, this.blockStepInInit)
+        let firstBlockToFetch = this.deployBlock - 1;
+        
+        if(LOAD_USERS_FROM_DISK) {
+            const loadedValue = loadUserListFromDisk(this.userFileName)
+            if(loadedValue) {
+                firstBlockToFetch = loadedValue.firstBlockToFetch;
+                this.userList = loadedValue.userList;
+            }
+        }
+
+            console.log(`collectAllUsers: Will fetch users from block ${firstBlockToFetch} to block ${currBlock}. Starting user count: ${this.userList.length}`);
+            for(let startBlock = firstBlockToFetch ; startBlock < currBlock ; startBlock += this.blockStepInInit) {
 
             const endBlock = (startBlock + this.blockStepInInit > currBlock) ? currBlock : startBlock + this.blockStepInInit
+            console.log(`collectAllUsers: ${startBlock} -> ${endBlock}. Stepsize: ${this.blockStepInInit}. Users: ${this.userList.length}`)
             let events
             try {
                 // Try to run this code
                 events = await this.lendingPool.getPastEvents("Deposit", {fromBlock: startBlock, toBlock:endBlock})
+                if(events.code == 429) {
+                    throw new Error('rate limited')
+
+                }
+                if(events == undefined) {
+                    throw new Error('events undefined')
+                }
             }
             catch(err) {
                 // if any error, Code throws the error
                 console.log("call failed, trying again", err.toString())
-                startBlock -= this.blockStepInInit // try again
+                startBlock -= this.blockStepInInit // try again after sleepin
+                await sleep(5)
                 continue
             }
             for(const e of events) {
                 const a = e.returnValues.onBehalfOf
                 if(! this.userList.includes(a)) this.userList.push(a)
             }
+        }
+
+        
+        if(LOAD_USERS_FROM_DISK) {
+            saveUserListToDisk(this.userFileName, this.userList, currBlock)
         }
     }
 

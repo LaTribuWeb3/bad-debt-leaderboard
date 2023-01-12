@@ -8,7 +8,7 @@ class ParseGranary extends Aave {
   constructor() {
     const network = 'FTM'
     const web3 = new Web3(process.env.FTM_NODE_URL) // https://rpc.fantom.network/
-    super(Addresses.granaryAddress, network, web3)
+    super(Addresses.granaryAddress, network, web3, 24, 1, 'granary_FTM_users.json')
   }
 
   async initPrices() {
@@ -21,9 +21,9 @@ class ParseGranary extends Aave {
 
 module.exports = { Parser: ParseGranary }
 
-async function test() {
-  const g = new ParseGranary()
-  await g.main()
-}
+// async function test() {
+//   const g = new ParseGranary()
+//   await g.main()
+// }
 
-//test()
+// test()
