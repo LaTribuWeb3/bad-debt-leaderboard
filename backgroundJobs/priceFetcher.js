@@ -4,7 +4,7 @@ const Web3 = require("web3")
 const { toBN, toWei, fromWei, toChecksumAddress } = Web3.utils
 const axios = require('axios')
 const assert = require('assert'); 
-const {retry} = require("../utils")
+const {retry, sleep} = require("../utils")
 require('dotenv').config()
 
 const coinGeckoChainIdMap = {
@@ -227,6 +227,8 @@ const specialAssetPriceFetchers = {
   }
 }
 
+let lastCoingeckoCall = Date.now();
+
 const getPrice = async (network, address, web3) => {
   if(network === "MOONBEAM") return 0
   try {
@@ -251,7 +253,14 @@ const getPrice = async (network, address, web3) => {
       } else {
         const coinGeckoApiCall = `https://api.coingecko.com/api/v3/simple/token_price/${coinGeckoChainIdMap[network]}?contract_addresses=${address}&vs_currencies=USD`
         console.log({coinGeckoApiCall})
+
+        // have at least 5 seconds between each coingecko calls to avoid http 429
+        let msToWait = 5000 - (Date.now() - lastCoingeckoCall);
+        if(msToWait > 0) {
+          await sleep(msToWait / 1000);
+        }
         const { data } = await retry(axios.get, [coinGeckoApiCall])
+        lastCoingeckoCall = Date.now();
         //console.log(data)
         apiPrice = Object.values(data)[0].usd || 0
       }

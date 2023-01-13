@@ -10,18 +10,15 @@ class VenusParser extends BSCParser {
         const compoundInfo = Addresses.venusAddress
         const network = 'BSC'
         const web3 = new Web3(process.env.BSC_NODE_URL)
-        super(compoundInfo, network, web3, 24 * 5)
+        super(compoundInfo, network, web3, 24 * 5, 1, 'venus_BSC_users.json')
     }
 }
 
 module.exports = { Parser: VenusParser }
 
 // async function test() {
-//     const Web3 = require("web3")
-//     const web3 = new Web3("https://bsc-dataseed1.defibit.io/")    
-
-//     const comp = new VenusParser(Addresses.venusAddress, "BSC", web3)
-//     await comp.main()    
+//     const parser = new VenusParser()
+//     await parser.main()    
 // }
 
 // test()

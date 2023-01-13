@@ -233,6 +233,7 @@ class AaveV3 {
         let currentStep = this.blockStepInInit;
 
         let lastBlockFetched = firstBlockToFetch - 1;
+        console.log(`collectAllUsers: Will fetch users from block ${firstBlockToFetch} to block ${currBlock}. Starting user count: ${this.userList.length}`);
         while(lastBlockFetched < currBlock) {
             const startBlock = lastBlockFetched + 1;
             const endBlock = startBlock + currentStep - 1 > currBlock ? currBlock : startBlock + currentStep - 1;

@@ -5,7 +5,9 @@ const Addresses = require("./Addresses.js")
 const { getPrice, getEthPrice, getCTokenPriceFromZapper } = require('./priceFetcher')
 const User = require("./User.js")
 const {waitForCpuToGoBelowThreshold} = require("../machineResources")
-const {retry} = require("../utils")
+const {retry, loadUserListFromDisk, saveUserListToDisk, sleep} = require("../utils")
+
+let LOAD_USERS_FROM_DISK = process.env.LOAD_USER_FROM_DISK && process.env.LOAD_USER_FROM_DISK.toLowerCase() == 'true';
 
 class Compound {
     /**
@@ -15,8 +17,9 @@ class Compound {
      * @param {Web3} web3 web3 connector
      * @param {number} heavyUpdateInterval defines the amount of fetch between two heavy updates
      * @param {number} fetchDelayInHours defines the delay between 2 fetch, in hours
+     * @param {string} userFileName defines the user file name, if any
      */
-    constructor(compoundInfo, network, web3, heavyUpdateInterval = 24, fetchDelayInHours = 1) {
+    constructor(compoundInfo, network, web3, heavyUpdateInterval = 24, fetchDelayInHours = 1, userFileName = null) {
       this.web3 = web3
       this.network = network
       this.comptroller = new web3.eth.Contract(Addresses.comptrollerAbi, compoundInfo[network].comptroller)
@@ -53,23 +56,27 @@ class Compound {
       this.totalBorrows = toBN("0")
 
       this.output = {}
-      this.fetchDelayInHours = fetchDelayInHours
+      this.fetchDelayInHours = fetchDelayInHours;
+      this.userFileName = userFileName;
+      if(this.userFileName == undefined) {
+        LOAD_USERS_FROM_DISK = false;
+      }
     }
 
     async heavyUpdate() {
-        const currBlock = await this.web3.eth.getBlockNumber() - 10
-        const currTime = (await this.web3.eth.getBlock(currBlock)).timestamp        
+        if(this.userList.length == 0
+            // if LOAD_USERS_FROM_DISK, collect all users each time heavy update is called 
+            // even is there is already some user in the user list
+            // it does not take too much time to fetch new users that way
+            || LOAD_USERS_FROM_DISK) {
+            await this.collectAllUsers();
+        }
 
-        if(this.userList.length == 0) await this.collectAllUsers()
         await this.updateAllUsers()
     }
 
     async lightUpdate() {
-        const currBlock = await this.web3.eth.getBlockNumber() - 10
-        const currTime = (await this.web3.eth.getBlock(currBlock)).timestamp
-
         await this.periodicUpdateUsers(this.lastUpdateBlock)
-        //await this.calcBadDebt(currTime) 
     }
 
     async main() {
@@ -238,25 +245,46 @@ class Compound {
     async collectAllUsers() {
         const currBlock = await this.web3.eth.getBlockNumber() - 10
         console.log({currBlock})
-        for(let startBlock = this.deployBlock ; startBlock < currBlock ; startBlock += this.blockStepInInit) {
-            console.log({startBlock}, this.userList.length, this.blockStepInInit)
+        let firstBlockToFetch = this.deployBlock - 1;
+
+        if(LOAD_USERS_FROM_DISK) {
+            const loadedValue = loadUserListFromDisk(this.userFileName)
+            if(loadedValue) {
+                firstBlockToFetch = loadedValue.firstBlockToFetch;
+                this.userList = loadedValue.userList;
+            }
+        }
+
+        console.log(`collectAllUsers: Will fetch users from block ${firstBlockToFetch} to block ${currBlock}. Starting user count: ${this.userList.length}`);
+        for(let startBlock = firstBlockToFetch ; startBlock < currBlock ; startBlock += this.blockStepInInit) {
 
             const endBlock = (startBlock + this.blockStepInInit > currBlock) ? currBlock : startBlock + this.blockStepInInit
             let events
             try {
                 // Try to run this code
                 events = await this.comptroller.getPastEvents("MarketEntered", {fromBlock: startBlock, toBlock:endBlock})
+                if(events.code == 429) {
+                    throw new Error('rate limited')
+                }
+                if(events == undefined) {
+                    throw new Error('events undefined')
+                }
             }
             catch(err) {
                 // if any error, Code throws the error
                 console.log("call failed, trying again", err.toString())
                 startBlock -= this.blockStepInInit // try again
+                await sleep(5)
                 continue
             }
             for(const e of events) {
                 const a = e.returnValues.account
                 if(! this.userList.includes(a)) this.userList.push(a)
             }
+        }
+
+        if(LOAD_USERS_FROM_DISK) {
+            saveUserListToDisk(this.userFileName, this.userList, currBlock)
         }
     }
 
