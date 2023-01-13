@@ -149,30 +149,30 @@ const aaveV3Configuration =
 	"AVAX": {
 		"poolAddressesProviderRegistry": "0x770ef9f4fe897e59daCc474EF11238303F9552b6",
 		"deployBlock": 11970175,
-		"blockStepInInit": 5000,
+		"blockStepInInit": 10000,
         "firstEventBlock": 12027175,
-		"multicallSize": 200
+		"multicallSize": 400
 	},
 	"ARBITRUM": {
 		"poolAddressesProviderRegistry": "0x770ef9f4fe897e59daCc474EF11238303F9552b6",
 		"deployBlock": 7736481,
-		"blockStepInInit": 1000,
+		"blockStepInInit": 10000,
         "firstEventBlock": 7998481,
-		"multicallSize": 100
+		"multicallSize": 1000
 	},
 	"OPTIMISM": {
 		"poolAddressesProviderRegistry": "0x770ef9f4fe897e59daCc474EF11238303F9552b6",
 		"deployBlock": 4365693,
-		"blockStepInInit": 10000,
+		"blockStepInInit": 100000,
         "firstEventBlock": 4365693,
 		"multicallSize": 200
 	},
     "MATIC": {
         "poolAddressesProviderRegistry": "0x770ef9f4fe897e59daCc474EF11238303F9552b6",
 		"deployBlock": 25826028,
-		"blockStepInInit": 1000,
+		"blockStepInInit": 10000,
         "firstEventBlock": 25871528,
-		"multicallSize": 100
+		"multicallSize": 400
     },
     "FTM": {
         "poolAddressesProviderRegistry": "0x770ef9f4fe897e59daCc474EF11238303F9552b6",

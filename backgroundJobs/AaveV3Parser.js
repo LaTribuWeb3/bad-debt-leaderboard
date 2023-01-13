@@ -5,11 +5,12 @@ const Addresses = require("./Addresses.js")
 const User = require("./User.js")
 const {waitForCpuToGoBelowThreshold} = require("../machineResources")
 const fs = require('fs');
+const { loadUserListFromDisk, saveUserListToDisk, sleep } = require('../utils.js')
 require('dotenv').config()
 
 // this param tell the script to load users from disk and also to save users into disk file 
 // when running heavy update
-const LOAD_USERS_FROM_DISK = process.env.AAVEV3_LOAD_USER_FROM_DISK && process.env.AAVEV3_LOAD_USER_FROM_DISK.toLowerCase() == 'true';
+let LOAD_USERS_FROM_DISK = process.env.LOAD_USER_FROM_DISK && process.env.LOAD_USER_FROM_DISK.toLowerCase() == 'true';
 /**
  * a small retry wrapper with an incrameting 5s sleep delay
  * @param {*} fn 
@@ -36,7 +37,7 @@ async function retry(fn, params, retries = 0) {
 }
 
 class AaveV3 {
-    constructor(AaveV3Info, network, web3, heavyUpdateInterval = 24) {
+    constructor(AaveV3Info, network, web3, heavyUpdateInterval = 24, fetchDelayInHours = 1, userFileName = undefined) {
       this.web3 = web3
       this.network = network
       this.poolAddressesProviderRegistryContract = new web3.eth.Contract(Addresses.aaveV3poolAddressesProviderRegistryAbi, AaveV3Info[network].poolAddressesProviderRegistry)
@@ -61,6 +62,11 @@ class AaveV3 {
       this.totalBorrows = toBN("0")
 
       this.output = {}
+      this.fetchDelayInHours = fetchDelayInHours;
+      this.userFileName = userFileName;
+      if(this.userFileName == undefined) {
+        LOAD_USERS_FROM_DISK = false;
+      }
     }
 
     /** 
@@ -210,22 +216,13 @@ class AaveV3 {
     async collectAllUsers() {
         const dtCollectStart = Date.now();
         let currBlock = (await this.web3.eth.getBlockNumber()) - 10
-        let firstBlockToFetch = this.firstEventBlock - 1;
+        let firstBlockToFetch = this.firstEventBlock;
 
-        const dataFileName = `aavev3_${this.network}_users.json`;
         if(LOAD_USERS_FROM_DISK) {
-            if(!fs.existsSync('saved_data')) {
-                fs.mkdirSync('saved_data');
-            }
-            if(fs.existsSync(`saved_data/${dataFileName}`)) {
-                const savedData = JSON.parse(fs.readFileSync(`saved_data/${dataFileName}`));
-                if(savedData.lastFetchedBlock && savedData.users) {
-                    firstBlockToFetch = savedData.lastFetchedBlock;
-                    this.userList = savedData.users;
-                    console.log(`collectAllUsers: Loaded user list from disk, next block to fetch: ${firstBlockToFetch}. Current userList.length: ${this.userList.length}.`)
-                }
-            } else {
-                console.log(`Could not find saved data file saved_data/${dataFileName}, will fetch data from the begining`)
+            const loadedValue = loadUserListFromDisk(this.userFileName)
+            if(loadedValue) {
+                firstBlockToFetch = loadedValue.firstBlockToFetch;
+                this.userList = loadedValue.userList;
             }
         }
 
@@ -235,7 +232,7 @@ class AaveV3 {
 
         let currentStep = this.blockStepInInit;
 
-        let lastBlockFetched = firstBlockToFetch;
+        let lastBlockFetched = firstBlockToFetch - 1;
         while(lastBlockFetched < currBlock) {
             const startBlock = lastBlockFetched + 1;
             const endBlock = startBlock + currentStep - 1 > currBlock ? currBlock : startBlock + currentStep - 1;
@@ -243,6 +240,12 @@ class AaveV3 {
             let events;
             try {
                 events = await this.lendingPool.getPastEvents("Supply", {fromBlock: startBlock, toBlock:endBlock})
+                if(events.code == 429) {
+                    throw new Error('rate limited')
+                }
+                if(events == undefined) {
+                    throw new Error('events undefined')
+                }
                 console.log(`collectAllUsers: block ${startBlock} -> ${endBlock}. Found ${events.length} events in ${currentStep} blocks. Current userList.length: ${this.userList.length}.`)
             }
             catch(err) {
@@ -250,6 +253,7 @@ class AaveV3 {
                 const newStepSize = Math.round(currentStep/2);
                 console.log(`Changing step size from ${currentStep} to ${newStepSize}`)
                 currentStep = newStepSize;
+                await sleep(5);
                 continue
             }
             for(const e of events) {
@@ -263,17 +267,11 @@ class AaveV3 {
             // reset step size to default
             currentStep = this.blockStepInInit;
         }
-
         
-
         if(LOAD_USERS_FROM_DISK) {
-            const savedUserData = {
-                lastFetchedBlock: currBlock,
-                users: this.userList
-            };
-
-            fs.writeFileSync(`saved_data/${dataFileName}`, JSON.stringify(savedUserData));
+            saveUserListToDisk(this.userFileName, this.userList, currBlock)
         }
+
         console.log(`collectAllUsers: collecting ${this.userList.length} users took ${Math.round((Date.now() - dtCollectStart)/1000)} s`);
     }
 

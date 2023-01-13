@@ -177,7 +177,6 @@ class Aave {
                 events = await this.lendingPool.getPastEvents("Deposit", {fromBlock: startBlock, toBlock:endBlock})
                 if(events.code == 429) {
                     throw new Error('rate limited')
-
                 }
                 if(events == undefined) {
                     throw new Error('events undefined')

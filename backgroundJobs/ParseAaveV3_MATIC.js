@@ -7,7 +7,7 @@ class ParseAaveV3_MATIC extends AaveV3 {
   constructor() {
     const network = 'MATIC'
     const web3 = new Web3(process.env.MATIC_NODE_URL)
-    super(Addresses.aaveV3Configuration, network, web3)
+    super(Addresses.aaveV3Configuration, network, web3, 24, 1, 'aavev3_MATIC_users.json');
   }
 }
 
@@ -18,4 +18,4 @@ module.exports = { Parser: ParseAaveV3_MATIC }
 //     await aavev3.main()
 // }
 
-//test()
+// test()
