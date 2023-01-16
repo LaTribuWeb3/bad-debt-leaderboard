@@ -83,7 +83,7 @@ const bastionAddress = { "NEAR" : { "comptroller": "0x6De54724e128274520606f0385
     "deployBlock" : 60837829, "blockStepInInit" : 10000, "multicallSize" : 20}}
 
 const apeSwapAddress = { "BSC" : { "comptroller" : "0xAD48B2C9DC6709a560018c678e918253a65df86e", "cETH" : "0x34878F6a484005AA90E7188a546Ea9E52b538F6f",
-    "deployBlock" :  12871489, "blockStepInInit" : 50000, "multicallSize" : 20}}
+    "deployBlock" :  12871489, "blockStepInInit" : 50000, "multicallSize" : 75}}
 
 const rikkiAddress = { "BSC" : { "comptroller" : "0x4f3e801Bd57dC3D641E72f2774280b21d31F64e4", "cETH" : "0x157822aC5fa0Efe98daa4b0A55450f4a182C10cA",
     "deployBlock" :  15341030, "blockStepInInit" : 50000, "multicallSize" : 20}}      

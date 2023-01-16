@@ -8,15 +8,16 @@ class ParseApeswap extends BSCParser {
     const compoundInfo = Addresses.apeSwapAddress
     const network = 'BSC'
     const web3 = new Web3(webUrl ? webUrl : process.env.BSC_NODE_URL)
-    super(compoundInfo, network, web3, 24 * 5)
+    super(compoundInfo, network, web3, 24, 1, 'apeswap_BSC_users.json')
   }
 }
 
-async function test() {
-  const comp = new ParseApeswap("https://bsc-dataseed1.defibit.io/")
-  await comp.main()
-}
-
-test()
-
 module.exports = { Parser: ParseApeswap }
+
+
+// async function test() {
+//   const parser = new ParseApeswap()
+//   await parser.main()
+// }
+
+// test()
