@@ -110,7 +110,7 @@ const aurigamiAddress = {
         "cETH": "0xca9511B610bA5fc7E311FDeF9cE16050eE4449E9",
         "deployBlock": 60501454,
         "blockStepInInit": 10000,
-        "multicallSize": 20
+        "multicallSize": 200
     }
 }
 

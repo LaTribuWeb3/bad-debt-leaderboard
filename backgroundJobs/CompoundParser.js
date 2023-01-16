@@ -257,7 +257,6 @@ class Compound {
 
         console.log(`collectAllUsers: Will fetch users from block ${firstBlockToFetch} to block ${currBlock}. Starting user count: ${this.userList.length}`);
         for(let startBlock = firstBlockToFetch ; startBlock < currBlock ; startBlock += this.blockStepInInit) {
-
             const endBlock = (startBlock + this.blockStepInInit > currBlock) ? currBlock : startBlock + this.blockStepInInit
             let events
             try {
@@ -281,6 +280,7 @@ class Compound {
                 const a = e.returnValues.account
                 if(! this.userList.includes(a)) this.userList.push(a)
             }
+            console.log(`collectAllUsers: ${startBlock} -> ${endBlock}. Stepsize: ${this.blockStepInInit}. Users: ${this.userList.length}`)
         }
 
         if(LOAD_USERS_FROM_DISK) {

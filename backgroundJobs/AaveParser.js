@@ -169,7 +169,6 @@ class Aave {
         console.log(`collectAllUsers: Will fetch users from block ${firstBlockToFetch} to block ${currBlock}. Starting user count: ${this.userList.length}`);
         for(let startBlock = firstBlockToFetch ; startBlock < currBlock ; startBlock += this.blockStepInInit) {
             const endBlock = (startBlock + this.blockStepInInit > currBlock) ? currBlock : startBlock + this.blockStepInInit
-            console.log(`collectAllUsers: ${startBlock} -> ${endBlock}. Stepsize: ${this.blockStepInInit}. Users: ${this.userList.length}`)
             let events
             try {
                 // Try to run this code
@@ -192,6 +191,7 @@ class Aave {
                 const a = e.returnValues.onBehalfOf
                 if(! this.userList.includes(a)) this.userList.push(a)
             }
+            console.log(`collectAllUsers: ${startBlock} -> ${endBlock}. Stepsize: ${this.blockStepInInit}. Users: ${this.userList.length}`)
         }
 
         if(LOAD_USERS_FROM_DISK) {
