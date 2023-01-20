@@ -255,9 +255,11 @@ class Compound {
             }
         }
 
+        let blockStep = this.blockStepInInit;
+
         console.log(`collectAllUsers: Will fetch users from block ${firstBlockToFetch} to block ${currBlock}. Starting user count: ${this.userList.length}`);
-        for(let startBlock = firstBlockToFetch ; startBlock < currBlock ; startBlock += this.blockStepInInit) {
-            const endBlock = (startBlock + this.blockStepInInit > currBlock) ? currBlock : startBlock + this.blockStepInInit
+        for(let startBlock = firstBlockToFetch ; startBlock < currBlock ; startBlock += blockStep) {
+            const endBlock = (startBlock + blockStep > currBlock) ? currBlock : startBlock + blockStep
             let events
             try {
                 // Try to run this code
@@ -272,15 +274,19 @@ class Compound {
             catch(err) {
                 // if any error, Code throws the error
                 console.log("call failed, trying again", err.toString())
-                startBlock -= this.blockStepInInit // try again
+                startBlock -= blockStep // try again
+                blockStep = blockStep / 2
                 await sleep(5)
                 continue
             }
+
+
             for(const e of events) {
                 const a = e.returnValues.account
                 if(! this.userList.includes(a)) this.userList.push(a)
             }
-            console.log(`collectAllUsers: ${startBlock} -> ${endBlock}. Stepsize: ${this.blockStepInInit}. Users: ${this.userList.length}`)
+            console.log(`collectAllUsers: ${startBlock} -> ${endBlock}. Stepsize: ${blockStep}. Users: ${this.userList.length}`)
+            blockStep = this.blockStepInInit;
         }
 
         if(LOAD_USERS_FROM_DISK) {

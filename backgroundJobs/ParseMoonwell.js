@@ -8,7 +8,7 @@ class MoonwellParser extends Compound {
     const compoundInfo = Addresses.moonwellAddress
     const network = 'MOONBEAM'
     const web3 = new Web3(process.env.MOONBEAM_NODE_URL)
-    super(compoundInfo, network, web3, 24 * 5)
+    super(compoundInfo, network, web3, 24, 1, 'moonwell_MOONBEAM_users.json')
   }
 
   async getFallbackPrice(market) {
@@ -30,9 +30,9 @@ class MoonwellParser extends Compound {
 
 module.exports = { Parser: MoonwellParser }
 
-async function test() {
-  const moon = new MoonwellParser()
-  await moon.main()
-}
+// async function test() {
+//   const moon = new MoonwellParser()
+//   await moon.main()
+// }
 
-//test()
+// test()

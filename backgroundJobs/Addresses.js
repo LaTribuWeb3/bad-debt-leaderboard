@@ -97,7 +97,7 @@ const inverseAddress = { "ETH" : { "comptroller" : "0x4dCf7407AE5C07f8681e1659f6
                      "0x697b4acAa24430F254224eB794d2a85ba1Fa1FB8"]} }
 
 const moonwellAddress = { "MOONBEAM" : { "comptroller" : "0x8E00D5e02E65A19337Cdba98bbA9F84d4186a180", "cETH" :         
-"0x091608f4e4a15335145be0A279483C0f8E4c7955", "deployBlock" : 1284556, "blockStepInInit" : 2000, "multicallSize" : 20}}
+"0x091608f4e4a15335145be0A279483C0f8E4c7955", "deployBlock" : 1284556, "blockStepInInit" : 5000, "multicallSize" : 200}}
 
 const vatEthAddress = { "ETH":
     { "address" : "0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B", "deployBlock" : 8928152, "blockStepInInit" : 50000, "multicallSize" : 400,
