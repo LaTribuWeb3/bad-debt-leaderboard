@@ -12,7 +12,7 @@ class IronBankParser extends Compound {
     const compoundInfo = Addresses.ironBankAddress
     const network = 'ETH'
     const web3 = new Web3(web3Url ? web3Url : process.env.ETH_NODE_URL)
-    super(compoundInfo, network, web3, 24 * 1, 24)
+    super(compoundInfo, network, web3, 24, 24, 'ironbank_ETH_users.json')
   }
 /*
   async collectAllUsers() {
@@ -116,35 +116,40 @@ class IronBankParser extends Compound {
   }
 }
 
-async function test() {
-  const addresses = [
-    "0x5f5Cd91070960D13ee549C9CC47e7a4Cd00457bb",
-    "0xba5eBAf3fc1Fcca67147050Bf80462393814E54B",
-    "0xcDDBA405f8129e5bAe101045aa45aCa11C03b1c8",
-    "0x085682716f61a72bf8C573FBaF88CCA68c60E99B",
-    "0x9ae50BD64e45fd87dD05c768ff314b8FE246B3fF",
-    "0x8338Aa899fB3168598D871Edc1FE2B4F0Ca6BBEF",
-    "0x0a0B06322825cb979678C722BA9932E0e4B5fd90"
-  ]
+// async function test() {
+//   const addresses = [
+//     "0x5f5Cd91070960D13ee549C9CC47e7a4Cd00457bb",
+//     "0xba5eBAf3fc1Fcca67147050Bf80462393814E54B",
+//     "0xcDDBA405f8129e5bAe101045aa45aCa11C03b1c8",
+//     "0x085682716f61a72bf8C573FBaF88CCA68c60E99B",
+//     "0x9ae50BD64e45fd87dD05c768ff314b8FE246B3fF",
+//     "0x8338Aa899fB3168598D871Edc1FE2B4F0Ca6BBEF",
+//     "0x0a0B06322825cb979678C722BA9932E0e4B5fd90"
+//   ]
 
-  const ironBank = new IronBankParser("https://cloudflare-eth.com")
-  //await ironBank.main()
+//   const ironBank = new IronBankParser("https://cloudflare-eth.com")
+//   //await ironBank.main()
   
-  const results = []
+//   const results = []
 
-  for(const user of addresses) {
-    const value = await ironBank.additionalCollateralBalance(user)
-    results.push(fromWei(value))
-    console.log("test:", {user}, fromWei(value))
-  }
+//   for(const user of addresses) {
+//     const value = await ironBank.additionalCollateralBalance(user)
+//     results.push(fromWei(value))
+//     console.log("test:", {user}, fromWei(value))
+//   }
 
-  console.log("------------------------")
-  for(let i = 0 ; i < addresses.length ; i++) {
-    console.log(addresses[i], results[i])
-  }
-}
+//   console.log("------------------------")
+//   for(let i = 0 ; i < addresses.length ; i++) {
+//     console.log(addresses[i], results[i])
+//   }
+// }
 
-//test()
+// async function test(){
+//   const parser = new IronBankParser();
+//   await parser.main();
+// }
+
+// test()
 
 
 module.exports = { Parser: IronBankParser }

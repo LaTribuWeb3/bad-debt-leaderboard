@@ -74,7 +74,7 @@ const benqiAddress = { "AVAX" : { "comptroller" : "0x486Af39519B4Dc9a7fCcd318217
     "deployBlock" : 3046286, "blockStepInInit" : 100000, "multicallSize" : 200}}
 
 const ironBankAddress = { "ETH" : { "comptroller" : "0xAB1c342C7bf5Ec5F02ADEA1c2270670bCa144CbB", "cETH" : "0xAB1c342C7bf5Ec5F02ADEA1c2270670bCa144CbB",
-    "deployBlock" : 11384868, "blockStepInInit" : 50000, "multicallSize" : 100}}    
+    "deployBlock" : 11384868, "blockStepInInit" : 100000, "multicallSize" : 60}}    
     
 const ovixAddress = { "MATIC" : { "comptroller" : "0x8849f1a0cB6b5D6076aB150546EddEe193754F1C", "cETH" : "0xE554E874c9c60E45F1Debd479389C76230ae25A8",
     "deployBlock" : 26312398, "blockStepInInit" : 10000, "multicallSize" : 100}}
