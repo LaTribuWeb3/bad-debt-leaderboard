@@ -12,7 +12,7 @@ class InverseParser extends Compound {
     const network = 'ETH'
     const url = web3Url ? web3Url : process.env.ETH_NODE_URL
     const web3 = new Web3(url)
-    super(compoundInfo, network, web3, 24 * 5, 24)
+    super(compoundInfo, network, web3, 24, 24, 'inverse_ETH_users.json')
   }
 
   async getFallbackPrice(market) {
@@ -28,12 +28,12 @@ class InverseParser extends Compound {
   }  
 }
 
-/*
-async function test() {
-  const comp = new InverseParser("TODO")
-  await comp.main()
-}
-
-test()
-*/
 module.exports = { Parser: InverseParser }
+
+
+// async function test() {
+//   const comp = new InverseParser()
+//   await comp.main()
+// }
+
+// test()

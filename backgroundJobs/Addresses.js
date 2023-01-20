@@ -91,7 +91,7 @@ const rikkiAddress = { "BSC" : { "comptroller" : "0x4f3e801Bd57dC3D641E72f277428
 const inverseAddress = { "ETH" : { "comptroller" : "0x4dCf7407AE5C07f8681e1659f626E114A7667339", "cETH" : "0x8e103Eb7a0D01Ab2b2D29C91934A9aD17eB54b86", 
     "cETH2" : "0x697b4acAa24430F254224eB794d2a85ba1Fa1FB8",
     "nonBorrowableMarkets" : ["0x65b35d6Eb7006e0e607BC54EB2dFD459923476fE", "0x1637e4e9941D55703a7A5E7807d6aDA3f7DCD61B"], 
-    "deployBlock" : 11915867, "blockStepInInit" : 50000, "multicallSize" : 200,
+    "deployBlock" : 11915867, "blockStepInInit" : 100000, "multicallSize" : 60,
     "rektMarkets" : ["0x17786f3813E6bA35343211bd8Fe18EC4de14F28b",
                      "0xde2af899040536884e062D3a334F2dD36F34b4a4",
                      "0x697b4acAa24430F254224eB794d2a85ba1Fa1FB8"]} }
