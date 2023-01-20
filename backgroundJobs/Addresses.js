@@ -116,7 +116,7 @@ const aurigamiAddress = {
 
 
 const creamAddress = { "BSC" : { "comptroller" : "0x589DE0F0Ccf905477646599bb3E5C622C84cC0BA", "cETH" : "0x1Ffe17B99b439bE0aFC831239dDECda2A790fF3A",
-    "deployBlock" : 100320, "blockStepInInit" : 5000, "multicallSize" : 20}}
+    "deployBlock" : 100320, "blockStepInInit" : 100000, "multicallSize" : 25}}
 
 const aaveAddress =
 { "ETH":

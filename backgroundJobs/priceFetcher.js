@@ -254,8 +254,8 @@ const getPrice = async (network, address, web3) => {
         const coinGeckoApiCall = `https://api.coingecko.com/api/v3/simple/token_price/${coinGeckoChainIdMap[network]}?contract_addresses=${address}&vs_currencies=USD`
         console.log({coinGeckoApiCall})
 
-        // have at least 5 seconds between each coingecko calls to avoid http 429
-        let msToWait = 5000 - (Date.now() - lastCoingeckoCall);
+        // have at least 8 seconds between each coingecko calls to avoid http 429
+        let msToWait = 8000 - (Date.now() - lastCoingeckoCall);
         if(msToWait > 0) {
           await sleep(msToWait / 1000);
         }
