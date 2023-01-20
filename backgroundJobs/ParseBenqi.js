@@ -8,8 +8,15 @@ class BenqiParser extends Compound {
     const compoundInfo = Addresses.benqiAddress
     const network = 'AVAX'
     const web3 = new Web3(process.env.AVAX_NODE_URL)
-    super(compoundInfo, network, web3, 24 * 5)
+    super(compoundInfo, network, web3, 24, 1, 'benqi_AVAX_users.json')
   }
 }
 
 module.exports = { Parser: BenqiParser }
+
+// async function test() {
+//   const parser = new BenqiParser();
+//   await parser.main();
+// }
+
+// test();
