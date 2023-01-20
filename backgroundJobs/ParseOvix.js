@@ -8,8 +8,15 @@ class OvixParser extends Compound {
     const compoundInfo = Addresses.ovixAddress
     const network = 'MATIC'
     const web3 = new Web3(process.env.MATIC_NODE_URL)
-    super(compoundInfo, network, web3, 24 * 5)
+    super(compoundInfo, network, web3, 24, 1, 'ovix_MATIC_users.json')
   }
 }
 
 module.exports = { Parser: OvixParser }
+
+// async function test() {
+//   const moon = new OvixParser()
+//   await moon.main()
+// }
+
+// test()
