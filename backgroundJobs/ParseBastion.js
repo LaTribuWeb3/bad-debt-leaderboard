@@ -8,8 +8,15 @@ class BastionParser extends Compound {
     const compoundInfo = Addresses.bastionAddress
     const network = 'NEAR'
     const web3 = new Web3(process.env.NEAR_NODE_URL)
-    super(compoundInfo, network, web3, 24 * 5)
+    super(compoundInfo, network, web3, 24, 1, 'bastion_NEAR_users.json')
   }
 }
 
 module.exports = { Parser: BastionParser }
+
+// async function test() {
+//   const parser = new BastionParser();
+//   await parser.main();
+// }
+
+// test();
