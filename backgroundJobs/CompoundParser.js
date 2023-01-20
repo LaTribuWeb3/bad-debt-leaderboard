@@ -82,10 +82,10 @@ class Compound {
     async main() {
         try {
             await waitForCpuToGoBelowThreshold()
-            await this.initPrices()
+            await this.initPrices();
                         
-            const currBlock = await this.web3.eth.getBlockNumber() - 10
-            const currTime = (await this.web3.eth.getBlock(currBlock)).timestamp
+            const currBlock = await retry(this.web3.eth.getBlockNumber, []) - 10
+            const currTime = (await retry(this.web3.eth.getBlock, [currBlock])).timestamp
 
             const usdcContract = new this.web3.eth.Contract(Addresses.cTokenAbi, this.usdcAddress)
             this.usdcDecimals = Number(await usdcContract.methods.decimals().call())
@@ -120,7 +120,7 @@ class Compound {
 
     async initPrices() {
         console.log("get markets")
-        this.markets = await this.comptroller.methods.getAllMarkets().call()
+        this.markets = await retry(this.comptroller.methods.getAllMarkets().call, []);
         console.log(this.markets)
 
         let tvl = toBN("0")
@@ -139,7 +139,7 @@ class Compound {
             }
             else {
                 console.log("getting underlying")
-                const underlying = await ctoken.methods.underlying().call()
+                const underlying = await retry(ctoken.methods.underlying().call, []);
                 price = await getPrice(this.network, underlying, this.web3)
                 if(price.toString() == "0" && this.network === "ETH") {
                     console.log("trying with zapper")
@@ -156,7 +156,7 @@ class Compound {
 
                 }
                 const token = new this.web3.eth.Contract(Addresses.cTokenAbi, underlying)
-                balance = await token.methods.balanceOf(market).call()
+                balance = await retry(token.methods.balanceOf(market).call, []);
             }
 
             if(price.toString() === "0") {
@@ -170,12 +170,12 @@ class Compound {
                 borrows = toBN("0")
             }
             else {
-                borrows = await ctoken.methods.totalBorrows().call()
+                borrows = await retry(ctoken.methods.totalBorrows().call, []);
             }
 
             const _1e18 = toBN(toWei("1"))
-            tvl = tvl.add(  (toBN(balance)).mul(toBN(price)).div(_1e18)  )
-            totalBorrows = totalBorrows.add(  (toBN(borrows)).mul(toBN(price)).div(_1e18)  )
+            tvl = tvl.add((toBN(balance)).mul(toBN(price)).div(_1e18))
+            totalBorrows = totalBorrows.add((toBN(borrows)).mul(toBN(price)).div(_1e18))
         }
 
         this.tvl = tvl
