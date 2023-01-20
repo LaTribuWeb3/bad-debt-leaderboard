@@ -59,7 +59,7 @@ const usdcAddress = {"ETH" : "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48", "BSC"
     "CRO": "0xc21223249CA28397B4B6541dfFaEcC539BfF0c59", "MOONBEAM" : "0x818ec0A7Fe18Ff94269904fCED6AE3DaE6d6dC0b" }
 
 const compoundAddress = { "ETH" : { "comptroller" : "0x3d9819210A31b4961b30EF54bE2aeD79B9c9Cd3B", "cETH" : "0x4Ddc2D193948926D02f9B1fE9e1daa0718270ED5",    
-    "deployBlock" : 7710671, "blockStepInInit" : 50000, "multicallSize" : 200} }
+    "deployBlock" : 7710671, "blockStepInInit" : 50000, "multicallSize" : 60} }
 
 const rariTetranodeAddress = { "ETH" : { "comptroller" : "0x814b02C1ebc9164972D888495927fe1697F0Fb4c", "cETH" : "0xF6551C22276b9Bf62FaD09f6bD6Cad0264b89789",
     "deployBlock" : 12860109, "blockStepInInit" : 50000, "multicallSize" : 500}}
@@ -71,7 +71,7 @@ const traderJoeAddress = { "AVAX" : { "comptroller" : "0xdc13687554205E5b89Ac783
     "deployBlock" : 5449252, "blockStepInInit" : 2048, "multicallSize" : 100}}
 
 const benqiAddress = { "AVAX" : { "comptroller" : "0x486Af39519B4Dc9a7fCcd318217352830E8AD9b4", "cETH" : "0x5C0401e81Bc07Ca70fAD469b451682c0d747Ef1c",
-    "deployBlock" : 3046286, "blockStepInInit" : 2048, "multicallSize" : 100}}
+    "deployBlock" : 3046286, "blockStepInInit" : 100000, "multicallSize" : 200}}
 
 const ironBankAddress = { "ETH" : { "comptroller" : "0xAB1c342C7bf5Ec5F02ADEA1c2270670bCa144CbB", "cETH" : "0xAB1c342C7bf5Ec5F02ADEA1c2270670bCa144CbB",
     "deployBlock" : 11384868, "blockStepInInit" : 50000, "multicallSize" : 100}}    
@@ -80,7 +80,7 @@ const ovixAddress = { "MATIC" : { "comptroller" : "0x8849f1a0cB6b5D6076aB150546E
     "deployBlock" : 26312398, "blockStepInInit" : 10000, "multicallSize" : 100}}
     
 const bastionAddress = { "NEAR" : { "comptroller": "0x6De54724e128274520606f038591A00C5E94a1F6", "cETH": "0x4E8fE8fd314cFC09BDb0942c5adCC37431abDCD0",    
-    "deployBlock" : 60837829, "blockStepInInit" : 10000, "multicallSize" : 20}}
+    "deployBlock" : 60837829, "blockStepInInit" : 100000, "multicallSize" : 200}}
 
 const apeSwapAddress = { "BSC" : { "comptroller" : "0xAD48B2C9DC6709a560018c678e918253a65df86e", "cETH" : "0x34878F6a484005AA90E7188a546Ea9E52b538F6f",
     "deployBlock" :  12871489, "blockStepInInit" : 50000, "multicallSize" : 75}}
@@ -135,7 +135,7 @@ const agaveAddress =
 
 const granaryAddress =
 { "FTM":
-    { "lendingPoolAddressesProviderAddress" : "0x8b9D58E2Dc5e9b5275b62b1F30b3c0AC87138130", "deployBlock" : 32461920, "blockStepInInit" : 100000,   "multicallSize" : 400 }
+    { "lendingPoolAddressesProviderAddress" : "0x8b9D58E2Dc5e9b5275b62b1F30b3c0AC87138130", "deployBlock" : 32461920, "blockStepInInit" : 100000,   "multicallSize" : 60 }
 }
 
 const tectonicAddress = { "CRO" : { "comptroller" : "0xb3831584acb95ED9cCb0C11f677B5AD01DeaeEc0", "cETH" : "0xeAdf7c01DA7E93FdB5f16B0aa9ee85f978e89E95",    

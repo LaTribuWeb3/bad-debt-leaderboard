@@ -8,8 +8,15 @@ class CompoundParser extends Compound {
     const compoundInfo = Addresses.compoundAddress
     const network = 'ETH'
     const web3 = new Web3(process.env.ETH_NODE_URL)
-    super(compoundInfo, network, web3, 24 * 5)
+    super(compoundInfo, network, web3, 24, 1, 'compound_ETH_users.json')
   }
 }
 
 module.exports = { Parser: CompoundParser }
+
+// async function test() {
+//   const parser = new CompoundParser();
+//   await parser.main();
+// }
+
+// test();
