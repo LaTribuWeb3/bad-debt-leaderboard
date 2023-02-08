@@ -5,7 +5,8 @@ const Addresses = require("./Addresses.js")
 const { getPrice, getEthPrice, getCTokenPriceFromZapper } = require('./priceFetcher')
 const User = require("./User.js")
 const {waitForCpuToGoBelowThreshold} = require("../machineResources")
-const {retry, loadUserListFromDisk, saveUserListToDisk, sleep} = require("../utils")
+const {retry, loadUserListFromDisk, saveUserListToDisk, sleep, generateMonitoringJSON} = require("../utils")
+const { uploadMonitoringJsonFile } = require('../githubClient.js')
 
 let LOAD_USERS_FROM_DISK = process.env.LOAD_USER_FROM_DISK && process.env.LOAD_USER_FROM_DISK.toLowerCase() == 'true';
 
@@ -19,7 +20,7 @@ class Compound {
      * @param {number} fetchDelayInHours defines the delay between 2 fetch, in hours
      * @param {string} userFileName defines the user file name, if any
      */
-    constructor(compoundInfo, network, web3, heavyUpdateInterval = 24, fetchDelayInHours = 1, userFileName = null) {
+    constructor(compoundInfo, network, web3, heavyUpdateInterval = 24, fetchDelayInHours = 1, userFileName = null, runnerName = 'defaultCompoundRunner') {
       this.web3 = web3
       this.network = network
       this.comptroller = new web3.eth.Contract(Addresses.comptrollerAbi, compoundInfo[network].comptroller)
@@ -61,6 +62,8 @@ class Compound {
       if(this.userFileName == undefined) {
         LOAD_USERS_FROM_DISK = false;
       }
+      this.runnerName = runnerName;
+      this.runnerFileName = runnerName.split(' ').join('-') + '.json';
     }
 
     async heavyUpdate() {
@@ -81,6 +84,8 @@ class Compound {
 
     async main() {
         try {
+            this.lastStart = Math.round(Date.now() / 1000);
+            await uploadMonitoringJsonFile(generateMonitoringJSON(this.runnerName, 'running', this.lastStart, this.lastEnd, this.lastDuration, this.lastUpdateBlock), this.runnerFileName);
             await waitForCpuToGoBelowThreshold()
             await this.initPrices();
                         
@@ -103,12 +108,16 @@ class Compound {
             await this.calcBadDebt(currTime)
             
             this.lastUpdateBlock = currBlock
+            this.lastEnd = Math.round(Date.now() / 1000);
+            this.lastDuration = this.lastEnd - this.lastStart;
+            await uploadMonitoringJsonFile(generateMonitoringJSON(this.runnerName, 'success', start, end, this.lastDuration, this.lastUpdateBlock), this.runnerFileName);
 
             // don't  increase cntr, this way if heavy update is needed, it will be done again next time
             console.log("sleeping", this.mainCntr++)
         }
         catch(err) {
             console.log("main failed", {err})
+            await uploadMonitoringJsonFile(generateMonitoringJSON(this.runnerName, 'error', start, end, this.lastDuration, this.lastUpdateBlock, err), this.runnerFileName);
         }
 
         setTimeout(this.main.bind(this), this.fetchDelayInHours * 3600 * 1000) // sleep for 'this.fetchDelayInHours' hour

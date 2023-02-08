@@ -10,7 +10,7 @@ class VenusParser extends BSCParser {
         const compoundInfo = Addresses.venusAddress
         const network = 'BSC'
         const web3 = new Web3(process.env.BSC_NODE_URL)
-        super(compoundInfo, network, web3, 24 * 5, 1, 'venus_BSC_users.json')
+        super(compoundInfo, network, web3, 24 * 5, 1, 'venus_BSC_users.json', 'BSC Venus Runner')
     }
 }
 

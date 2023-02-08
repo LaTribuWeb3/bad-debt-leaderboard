@@ -78,8 +78,46 @@ const getJsonFile = async (fileName) => {
   }
 }
 
+const uploadMonitoringJsonFile = async (jsonString, fileName) => {
+  if(IS_STAGING) {
+    console.log('uploadMonitoringJsonFile: ignoring for staging env');
+    return;
+  }
+
+  try {
+    console.log(`uploadMonitoringJsonFile: uploading ${fileName} to monitoring`);
+    let sha = null
+    try{
+      const res = await octokit.request(`Get /repos/{owner}/{repo}/contents/baddebt/{path}`, {
+        owner: 'LaTribuWeb3',
+        repo: 'monitoring-results',
+        path: `${fileName}`,
+      })
+      sha = res.data.sha
+    } catch (err) {
+    }
+
+    return octokit.request(`PUT /repos/{owner}/{repo}/contents/baddebt/{path}`, {
+      owner: 'LaTribuWeb3',
+      repo: 'monitoring-results',
+      path: `${fileName}`,
+      message: `bad-debt monitoring push ${new Date().toString()}`,
+      sha,
+      committer: {
+        name: process.env.GH_HANDLE,
+        email: 'hello@la-tribu.xyz'
+      },
+      content: base64.encode(jsonString)
+    })
+  } catch(err) {
+    console.error('failed to upload to github')
+    console.error(err)
+  }
+}
+
 module.exports = {
   uploadJsonFile: (...arguments) => retry(uploadJsonFile, arguments), 
   listJsonFiles: (...arguments) => retry(listJsonFiles, arguments),
   getJsonFile: (...arguments) => retry(getJsonFile, arguments), 
+  uploadMonitoringJsonFile: (...arguments) => retry(uploadMonitoringJsonFile, arguments), 
 }
