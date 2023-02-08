@@ -8,7 +8,7 @@ let LOAD_USERS_FROM_DISK = process.env.LOAD_USER_FROM_DISK && process.env.LOAD_U
 
 class BSCParser extends Compound {
     async collectAllUsers() {
-        const currBlock = await this.web3.eth.getBlockNumber() - 10
+        const currBlock = await this.web3.eth.getBlockNumber() - 100
         const comptrollerAddress = this.comptroller.options.address
         let firstBlockToFetch = this.deployBlock - 1;
 
