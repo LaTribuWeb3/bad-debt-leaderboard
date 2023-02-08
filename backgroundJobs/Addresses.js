@@ -146,6 +146,13 @@ const tectonicAddress = { "CRO" : { "comptroller" : "0xb3831584acb95ED9cCb0C11f6
 
 const aaveV3Configuration =
 {
+    "ETH": {
+		"poolAddressesProviderRegistry": "0xbaA999AC55EAce41CcAE355c77809e68Bb345170",
+		"deployBlock": 16291127,
+		"blockStepInInit": 10000,
+        "firstEventBlock": 16491127,
+		"multicallSize": 400
+	},
 	"AVAX": {
 		"poolAddressesProviderRegistry": "0x770ef9f4fe897e59daCc474EF11238303F9552b6",
 		"deployBlock": 11970175,
