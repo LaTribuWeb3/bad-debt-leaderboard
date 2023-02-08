@@ -247,7 +247,6 @@ class AaveV3 {
                 if(events == undefined) {
                     throw new Error('events undefined')
                 }
-                console.log(`collectAllUsers: block ${startBlock} -> ${endBlock}. Found ${events.length} events in ${currentStep} blocks. Current userList.length: ${this.userList.length}.`)
             }
             catch(err) {
                 console.log(`call failed when fetching events from block ${startBlock} -> ${endBlock}, trying again`, err.toString())
@@ -267,6 +266,7 @@ class AaveV3 {
             
             // reset step size to default
             currentStep = this.blockStepInInit;
+            console.log(`collectAllUsers: block ${startBlock} -> ${endBlock}. Found ${events.length} events in ${currentStep} blocks. Current userList.length: ${this.userList.length}.`)
         }
         
         if(LOAD_USERS_FROM_DISK) {
