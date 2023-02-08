@@ -22,9 +22,9 @@ const halfHour = 1000 * 60 * 30
       }
       const res = await  fn(...params)
       if(retries){
-          console.log(`retry success after ${retries} retries` , fn.name)
+          // console.log(`retry success after ${retries} retries` , fn.name)
       } else {
-          console.log(`success on first try`, fn.name)
+          // console.log(`success on first try`, fn.name)
       }
       return res
   } catch (e) {
@@ -32,7 +32,7 @@ const halfHour = 1000 * 60 * 30
       retries++
       console.log(`retry #${retries}`)
       const ms = (1000 * 5 * retries) > halfHour ? halfHour : (1000 * 5 * retries)
-      await new Promise(resolve => setTimeout(resolve, ms))
+      await sleep(ms / 1000);
       return retry(fn, params, retries)
   }
 }
