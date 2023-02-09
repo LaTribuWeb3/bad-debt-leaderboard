@@ -7,7 +7,7 @@ class ParseAaveV3_AVAX extends AaveV3 {
   constructor() {
     const network = 'AVAX'
     const web3 = new Web3(process.env.AVAX_NODE_URL)
-    super(Addresses.aaveV3Configuration, network, web3, 24, 1, 'aavev3_AVAX_users.json');
+    super(Addresses.aaveV3Configuration, network, web3, 24, 1, 'aavev3_AVAX_users.json', 'AVAX AaveV3 Runner');
   }
 }
 

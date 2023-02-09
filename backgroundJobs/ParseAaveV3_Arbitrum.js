@@ -7,7 +7,7 @@ class ParseAaveV3_Arbitrum extends AaveV3 {
   constructor() {
     const network = 'ARBITRUM'
     const web3 = new Web3(process.env.ARBITRUM_NODE_URL)
-    super(Addresses.aaveV3Configuration, network, web3, 24, 1, 'aavev3_ARBITRUM_users.json');
+    super(Addresses.aaveV3Configuration, network, web3, 24, 1, 'aavev3_ARBITRUM_users.json', 'Arbitrum AaveV3 Runner');
   }
 }
 

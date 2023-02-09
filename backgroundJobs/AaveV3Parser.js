@@ -5,7 +5,8 @@ const Addresses = require("./Addresses.js")
 const User = require("./User.js")
 const {waitForCpuToGoBelowThreshold} = require("../machineResources")
 const fs = require('fs');
-const { loadUserListFromDisk, saveUserListToDisk, sleep } = require('../utils.js')
+const { loadUserListFromDisk, saveUserListToDisk, sleep, generateMonitoringJSON } = require('../utils.js')
+const { uploadMonitoringJsonFile } = require('../githubClient.js')
 require('dotenv').config()
 
 // this param tell the script to load users from disk and also to save users into disk file 
@@ -37,7 +38,7 @@ async function retry(fn, params, retries = 0) {
 }
 
 class AaveV3 {
-    constructor(AaveV3Info, network, web3, heavyUpdateInterval = 24, fetchDelayInHours = 1, userFileName = undefined) {
+    constructor(AaveV3Info, network, web3, heavyUpdateInterval = 24, fetchDelayInHours = 1, userFileName = undefined, runnerName = 'defaultAaveV3Runner') {
       this.web3 = web3
       this.network = network
       this.poolAddressesProviderRegistryContract = new web3.eth.Contract(Addresses.aaveV3poolAddressesProviderRegistryAbi, AaveV3Info[network].poolAddressesProviderRegistry)
@@ -67,6 +68,8 @@ class AaveV3 {
       if(this.userFileName == undefined) {
         LOAD_USERS_FROM_DISK = false;
       }
+      this.runnerName = runnerName;
+      this.runnerFileName = runnerName.split(' ').join('-') + '.json';
     }
 
     /** 
@@ -116,8 +119,15 @@ class AaveV3 {
         await this.periodicUpdateUsers(this.lastUpdateBlock)
     }
 
+    async updateMonitoringFile(status, error) {
+        await uploadMonitoringJsonFile(generateMonitoringJSON(this.runnerName, status, this.lastStart, this.lastEnd, this.lastDuration, this.lastUpdateBlock, error), this.runnerFileName);
+    }
+
     async main() {
         try {
+            this.lastStart = Math.round(Date.now() / 1000);
+            await this.updateMonitoringFile('running', null);
+        
             await waitForCpuToGoBelowThreshold()
             await this.init()
 
@@ -137,12 +147,16 @@ class AaveV3 {
             await this.calcBadDebt(currTime)
             
             this.lastUpdateBlock = currBlock
+            this.lastEnd = Math.round(Date.now() / 1000);
+            this.lastDuration = this.lastEnd - this.lastStart;
+            await this.updateMonitoringFile('success', null);
 
             // don't  increase cntr, this way if heavy update is needed, it will be done again next time
             console.log("this.mainCntr:", this.mainCntr++)
         }
         catch(err) {
             console.log("main failed", {err})
+            await this.updateMonitoringFile('error', err);
         }
 
         const sleepTime = 1000 * 60 * 60;

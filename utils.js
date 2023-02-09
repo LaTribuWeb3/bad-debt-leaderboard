@@ -78,6 +78,17 @@ function saveUserListToDisk(fileName, userList, lastFetchedBlock) {
   fs.writeFileSync(`saved_data/${fileName}`, JSON.stringify(savedUserData));
 }
 
+/**
+ * 
+ * @param {string} runnerName 
+ * @param {string} status 
+ * @param {number} lastStart 
+ * @param {number} lastEnd 
+ * @param {number} lastDuration 
+ * @param {number} lastBlockFetched 
+ * @param {any} error 
+ * @returns {string} json representation of the monitoring object
+ */
 function generateMonitoringJSON(runnerName, status, lastStart, lastEnd, lastDuration, lastBlockFetched, error) {
   return JSON.stringify({
     "name": runnerName,

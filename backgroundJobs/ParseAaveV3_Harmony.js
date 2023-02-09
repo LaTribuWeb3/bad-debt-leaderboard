@@ -7,7 +7,7 @@ class ParseAaveV3_Harmony extends AaveV3 {
   constructor() {
     const network = 'HARMONY'
     const web3 = new Web3(process.env.HARMONY_NODE_URL)
-    super(Addresses.aaveV3Configuration, network, web3, 24, 1, 'aavev3_HARMONY_users.json');
+    super(Addresses.aaveV3Configuration, network, web3, 24, 1, 'aavev3_HARMONY_users.json', 'Harmony AaveV3 Runner');
   }
 }
 

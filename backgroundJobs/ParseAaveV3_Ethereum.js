@@ -7,7 +7,7 @@ class ParseAaveV3_Ethereum extends AaveV3 {
   constructor() {
     const network = 'ETH'
     const web3 = new Web3(process.env.ETH_NODE_URL)
-    super(Addresses.aaveV3Configuration, network, web3, 24, 1, 'aavev3_ETHEREUM_users.json');
+    super(Addresses.aaveV3Configuration, network, web3, 24, 1, 'aavev3_ETHEREUM_users.json', 'ETH AaveV3 Runner');
   }
 }
 

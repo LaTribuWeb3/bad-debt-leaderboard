@@ -7,7 +7,7 @@ class ParseAaveV3_FTM extends AaveV3 {
   constructor() {
     const network = 'FTM'
     const web3 = new Web3(process.env.FTM_NODE_URL)
-    super(Addresses.aaveV3Configuration, network, web3, 24, 1, 'aavev3_FTM_users.json');
+    super(Addresses.aaveV3Configuration, network, web3, 24, 1, 'aavev3_FTM_users.json', 'FTM AaveV3 Runner');
   }
 }
 

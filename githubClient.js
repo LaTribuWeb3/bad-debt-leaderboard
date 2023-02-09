@@ -118,6 +118,6 @@ const uploadMonitoringJsonFile = async (jsonString, fileName) => {
 module.exports = {
   uploadJsonFile: (...arguments) => retry(uploadJsonFile, arguments), 
   listJsonFiles: (...arguments) => retry(listJsonFiles, arguments),
-  getJsonFile: (...arguments) => retry(getJsonFile, arguments), 
+  getJsonFile: (...arguments) => retry(getJsonFile, arguments),
   uploadMonitoringJsonFile: (...arguments) => retry(uploadMonitoringJsonFile, arguments), 
 }
