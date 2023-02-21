@@ -18,17 +18,15 @@ class User {
         for(const market of this.marketsIn) {
             // ignore the account if no price or no collateral/debt values
             // in IB there are assets that no longer appear in the market assets. but are part of asset in (go figure...)
-            if(this.collateralBalace[market] === undefined ||
-                prices[market].toString() === web3.utils.toBN("0").toString() ||
-                this.borrowBalance[market] === undefined ) {
-                    console.log("zero price for market", {market})
-                    return { "netValue" : web3.utils.toBN("0"),
-                             "collateral" : web3.utils.toBN("0"),
-                             "debt" : web3.utils.toBN("0") }
-                }
+            if(prices[market].toString() === "0") {
+                console.log("zero price for market", market)
+                continue;
+            }
 
-            const plus = web3.utils.toBN(this.collateralBalace[market]).mul(prices[market]).div(_1e18)
-            const minus = web3.utils.toBN(this.borrowBalance[market]).mul(prices[market]).div(_1e18)
+            const collValue = this.collateralBalace[market] ? this.collateralBalace[market] : "0";
+            const debtValue = this.borrowBalance[market] ? this.borrowBalance[market] : "0";
+            const plus = web3.utils.toBN(collValue).mul(prices[market]).div(_1e18)
+            const minus = web3.utils.toBN(debtValue).mul(prices[market]).div(_1e18)
             netValue = netValue.add(plus).sub(minus)
             //console.log("asset", market, "plus", plus.toString(), "minus", minus.toString(), this.collateralBalace[market].toString(), 
             //this.borrowBalance[market].toString(), prices[market].toString())

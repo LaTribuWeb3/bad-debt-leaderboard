@@ -5,7 +5,7 @@ const Addresses = require("./Addresses.js")
 const { getPrice, getEthPrice, getCTokenPriceFromZapper } = require('./priceFetcher')
 const User = require("./User.js")
 const {waitForCpuToGoBelowThreshold} = require("../machineResources")
-const {retry, loadUserListFromDisk, saveUserListToDisk, sleep, generateMonitoringJSON} = require("../utils")
+const {retry, loadUserListFromDisk, saveUserListToDisk, sleep, generateMonitoringJSON, deleteUserDataFile, appendToUserDataFile, getUserDataReadlineInterface, updateUserDataFile} = require("../utils")
 const { uploadMonitoringJsonFile } = require('../githubClient.js')
 
 let LOAD_USERS_FROM_DISK = process.env.LOAD_USER_FROM_DISK && process.env.LOAD_USER_FROM_DISK.toLowerCase() == 'true';
@@ -20,7 +20,7 @@ class Compound {
      * @param {number} fetchDelayInHours defines the delay between 2 fetch, in hours
      * @param {string} userFileName defines the user file name, if any
      */
-    constructor(compoundInfo, network, web3, heavyUpdateInterval = 24, fetchDelayInHours = 1, userFileName = null, runnerName = 'defaultCompoundRunner') {
+    constructor(compoundInfo, network, web3, heavyUpdateInterval = 24, fetchDelayInHours = 1, userFileName = null, runnerName = 'defaultCompoundRunner', userDataFileName = null) {
       this.web3 = web3
       this.network = network
       this.comptroller = new web3.eth.Contract(Addresses.comptrollerAbi, compoundInfo[network].comptroller)
@@ -64,6 +64,7 @@ class Compound {
       }
       this.runnerName = runnerName;
       this.runnerFileName = runnerName.split(' ').join('-') + '.json';
+      this.userDataFileName = userDataFileName;
     }
 
     async heavyUpdate() {
@@ -82,12 +83,17 @@ class Compound {
         await this.periodicUpdateUsers(this.lastUpdateBlock)
     }
 
+    async updateMonitoringFile(status, error) {
+        await uploadMonitoringJsonFile(generateMonitoringJSON(this.runnerName, status, this.lastStart, this.lastEnd, this.lastDuration, this.lastUpdateBlock, error), this.runnerFileName);
+    }
+
     async main() {
         try {
             this.lastStart = Math.round(Date.now() / 1000);
-            await uploadMonitoringJsonFile(generateMonitoringJSON(this.runnerName, 'running', this.lastStart, this.lastEnd, this.lastDuration, this.lastUpdateBlock), this.runnerFileName);
+            await this.updateMonitoringFile('running', null);
             await waitForCpuToGoBelowThreshold()
-            await this.initPrices();
+            const fnInitPrice = (...args) => this.initPrices(...args);
+            await retry(fnInitPrice, [])
                         
             const currBlock = await retry(this.web3.eth.getBlockNumber, []) - 10
             const currTime = (await retry(this.web3.eth.getBlock, [currBlock])).timestamp
@@ -110,14 +116,14 @@ class Compound {
             this.lastUpdateBlock = currBlock
             this.lastEnd = Math.round(Date.now() / 1000);
             this.lastDuration = this.lastEnd - this.lastStart;
-            await uploadMonitoringJsonFile(generateMonitoringJSON(this.runnerName, 'success', start, end, this.lastDuration, this.lastUpdateBlock), this.runnerFileName);
+            await this.updateMonitoringFile('success', null);
 
             // don't  increase cntr, this way if heavy update is needed, it will be done again next time
             console.log("sleeping", this.mainCntr++)
         }
         catch(err) {
             console.log("main failed", {err})
-            await uploadMonitoringJsonFile(generateMonitoringJSON(this.runnerName, 'error', start, end, this.lastDuration, this.lastUpdateBlock, err), this.runnerFileName);
+            await this.updateMonitoringFile('error', err);
         }
 
         setTimeout(this.main.bind(this), this.fetchDelayInHours * 3600 * 1000) // sleep for 'this.fetchDelayInHours' hour
@@ -144,7 +150,7 @@ class Compound {
 
             if(this.cETHAddresses.includes(market)) {
                 price = await getEthPrice(this.network)
-                balance = await this.web3.eth.getBalance(market)
+                balance = await retry(this.web3.eth.getBalance, [market]);
             }
             else {
                 console.log("getting underlying")
@@ -199,6 +205,7 @@ class Compound {
         for (let i = from; i < to; i = i + this.blockStepInInit) {
             const fromBlock = i
             const toBlock = i + this.blockStepInInit > to ? to : i + this.blockStepInInit
+            console.log(`getPastEventsInSteps: Getting events ${key} from ${fromBlock} to ${toBlock}`);
             const fn = (...args) => cToken.getPastEvents(...args)
             const events = await retry(fn, [key, {fromBlock, toBlock}])
             totalEvents = totalEvents.concat(events)
@@ -208,6 +215,7 @@ class Compound {
 
     async periodicUpdateUsers(lastUpdatedBlock) {
         const accountsToUpdate = []
+        const newUsers = [];
         const currBlock = await this.web3.eth.getBlockNumber() - 10
         console.log({currBlock})
 
@@ -239,20 +247,30 @@ class Compound {
 
         console.log({accountsToUpdate})
         for(const a of accountsToUpdate) {
-            if(! this.userList.includes(a)) this.userList.push(a)            
+            if(! this.userList.includes(a)) {
+                this.userList.push(a)
+                // save the new users to differenciate between old user that will need to be updated
+                // and the new users that will just need to be appended to the user data file
+                newUsers.push(a);
+            }
         }
         // updating users in slices
-        const bulkSize = this.multicallSize
+        const bulkSize = this.multicallSize;
+        let userDataToUpdate = {};
         for (let i = 0; i < accountsToUpdate.length; i = i + bulkSize) {
             const to = i + bulkSize > accountsToUpdate.length ? accountsToUpdate.length : i + bulkSize
             const slice = accountsToUpdate.slice(i, to)
             const fn = (...args) => this.updateUsers(...args)
-            await retry(fn, [slice])
+            const newData = await retry(fn, [slice])
+            // merge newData with userDataToUpdate
+            userDataToUpdate = Object.assign({}, userDataToUpdate, newData);
         }
+
+        await updateUserDataFile(this.userDataFileName, userDataToUpdate, newUsers);
     }
 
     async collectAllUsers() {
-        const currBlock = await this.web3.eth.getBlockNumber() - 10
+        const currBlock = await retry(this.web3.eth.getBlockNumber, []) - 10
         console.log({currBlock})
         let firstBlockToFetch = this.deployBlock - 1;
 
@@ -306,12 +324,16 @@ class Compound {
     async updateAllUsers() {
         const users = this.userList //require('./my.json')
         const bulkSize = this.multicallSize
+
+        deleteUserDataFile(this.userDataFileName);
+        // delete old data file
         for(let i = 0 ; i < users.length ; i+= bulkSize) {
             const start = i
             const end = i + bulkSize > users.length ? users.length : i + bulkSize
             console.log("update", i.toString() + " / " + users.length.toString())
             try {
-                await this.updateUsers(users.slice(start, end))
+                const usersDataInBatch = await this.updateUsers(users.slice(start, end))
+                appendToUserDataFile(this.userDataFileName, usersDataInBatch);
             }
             catch(err) {
                 console.log("update user failed, trying again", err)
@@ -331,8 +353,19 @@ class Compound {
         let tvl = this.web3.utils.toBN("0")
 
         const userWithBadDebt = []
-        
-        for(const [user, data] of Object.entries(this.users)) {
+
+        const userDataReadlineAccessor = getUserDataReadlineInterface(this.userDataFileName);
+
+        let firstLine = true;
+        for await (const line of userDataReadlineAccessor.readlineInterface) {
+            if(firstLine) {
+                firstLine = false;
+                continue;
+            }
+
+            const user = line.split(';')[0];
+            const dataJson = line.split(';')[1];
+            const data = JSON.parse(dataJson);
 
             const userData = new User(user, data.marketsIn, data.borrowBalance, data.collateralBalace, data.error)
             //console.log({user})
@@ -356,6 +389,8 @@ class Compound {
                 userWithBadDebt.push({"user" : user, "badDebt" : netValue.toString()})
             }
         }
+        // at the end, close the filestream
+        userDataReadlineAccessor.stream.close();
 
         this.output = { "total" :  this.sumOfBadDebt.toString(), "updated" : currTime.toString(), "decimals" : "18", "users" : userWithBadDebt,
                         "tvl" : this.tvl.toString(), "deposits" : deposits.toString(), "borrows" : borrows.toString(),
@@ -422,7 +457,13 @@ class Compound {
         // init class for all users
         let userIndex = 0
         let globalIndex = 0
+        const usersInBatch = {};
         for(const user of userAddresses) {
+
+            if(user == '0xDbb26dE83C17642a434BE33155cd65bA937e7D08') {
+                console.log('user with error');
+            }
+
             let success = true
             if(! assetInResult[userIndex].success) success = false
             const assetsIn = this.web3.eth.abi.decodeParameter("address[]", assetInResult[userIndex].returnData)
@@ -438,14 +479,34 @@ class Compound {
                 const borrowBal = this.web3.eth.abi.decodeParameter("uint256", borrowBalanceResults[globalIndex].returnData)
 
                 borrowBalances[market] = this.web3.utils.toBN(borrowBal)
-                collateralBalances[market] = this.web3.utils.toBN(colatBal)               
+                collateralBalances[market] = this.web3.utils.toBN(colatBal)
+                
+                // remove if 0, use less RAM/storage
+                if(borrowBalances[market] == '0') {
+                    delete borrowBalances[market];
+                }
+
+                if(collateralBalances[market] == '0') {
+                    delete collateralBalances[market];
+                }
 
                 globalIndex++
             }
 
             const userData = new User(user, this.intersect(assetsIn, this.markets), borrowBalances, collateralBalances, ! success)
-            this.users[user] = userData
+
+            if(success) {
+                // only save user data if any borrow or collateral
+                // will use less RAM/storage
+                if(Object.keys(borrowBalances).length != 0
+                   || Object.keys(collateralBalances).length != 0)
+                usersInBatch[user] = userData
+            } else {
+                console.log('Error when updating user', user, JSON.stringify(userData, null, 2));
+            }
         }
+
+        return usersInBatch;
     }
 
     intersect(arr1, arr2) {
@@ -460,26 +521,15 @@ class Compound {
 
 module.exports = Compound
 
-/*
-const Web3 = require("web3")
+// async function test() {
+//     const web3 = new Web3(process.env.BSC_NODE_URL)
+//     const ctoken = new web3.eth.Contract(Addresses.cTokenAbi, '0xecA88125a5ADbe82614ffC12D0DB554E2e2867C8');
+//     const currBlock = await web3.getBlockNumber
+//     const from =  25832698 - 100000;
+//     const to = from + 50000 - 1;
+//     const events = await ctoken.getPastEvents("Mint", {fromBlock: from, toBlock:to})
+   
+//  }
 
-
-
-async function test() {
-    //const comp = new Compound(Addresses.traderJoeAddress, "AVAX", web3)
-    //const comp = new Compound(Addresses.ironBankAddress, "AVAX", web3)
-    const comp = new Compound(Addresses.ironBankAddress, "ETH", web3)
-    //const comp = new Compound(Addresses.venusAddress, "BSC", web3)
-
-        
-    await comp.main()
-    //await comp.updateUsers(["0x6C09184c823CC246435d1287F0AA3948742830E0","0x16b134c44170d78e2f8cad567bb70462dbf05a04"])
-    //await comp.collectAllUsers()
-    //await comp.updateUsers(["0xb3fbE25Be2e8CA097e9ac924e94aF000DD3A5663"])
-    //await comp.updateAllUsers()
-    //await comp.periodicUpdate(14788673 - 1000)
-    //await comp.calcBadDebt()
- }
-
- test()*/
+//  test()
 
