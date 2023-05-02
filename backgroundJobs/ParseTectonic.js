@@ -8,7 +8,7 @@ class TectonicParser extends Compound {
     const tectonicInfo = Addresses.tectonicAddress
     const network = 'CRO'
     const web3 = new Web3(process.env.CRO_NODE_URL)
-    super(tectonicInfo, network, web3, 24 * 5)
+    super(tectonicInfo, network, web3, 24, 1, 'tectonic_CRONOS_users.json', 'CRONOS Tectonic Runner', 'tectonic_CRONOS_data.csv')
   }
 }
 

@@ -10,4 +10,11 @@ class ParseMaker extends Maker {
   }
 }
 
+async function test() {
+  const parser = new ParseMaker()
+  parser.main();
+}
+
+test();
+
 module.exports = { Parser: ParseMaker }

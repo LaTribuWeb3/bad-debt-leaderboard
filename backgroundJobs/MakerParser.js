@@ -5,7 +5,7 @@ const Addresses = require("./Addresses.js")
 const { getPrice, getEthPrice, getCTokenPriceFromZapper } = require('./priceFetcher')
 const User = require("./User.js")
 const {waitForCpuToGoBelowThreshold} = require("../machineResources")
-const {retry} = require("../utils")
+const {retry, sleep} = require("../utils")
 
 
 class MakerParser {
@@ -103,11 +103,31 @@ class MakerParser {
     async collectAllUsersFromEvents(chainId, eventTopic, ilkIndex, urnIndices) { 
         const currBlock = /*this.deployBlock + 50000 //*/  await this.web3.eth.getBlockNumber() - 10
         console.log({currBlock})
-        for(let startBlock = this.lastUpdateBlock ; startBlock < currBlock ; startBlock += this.blockStepInInit) {
-            const endBlock = (startBlock + this.blockStepInInit > currBlock) ? currBlock : startBlock + this.blockStepInInit
-            console.log({startBlock}, this.userList.length, this.blockStepInInit, endBlock)
+        let currentStepSize = this.blockStepInInit;
+        for(let startBlock = this.lastUpdateBlock ; startBlock < currBlock ; startBlock += currentStepSize) {
+            const endBlock = (startBlock + currentStepSize > currBlock) ? currBlock : startBlock + currentStepSize
+            console.log({startBlock}, this.userList.length, currentStepSize, endBlock)
 
-            const allEvents = await this.vat.getPastEvents("allEvents", {topics: [eventTopic], fromBlock: startBlock, toBlock : endBlock})
+            let allEvents;
+
+            try {
+                allEvents = await this.vat.getPastEvents("allEvents", {topics: [eventTopic], fromBlock: startBlock, toBlock : endBlock})
+                if(allEvents.code == 429) {
+                    throw new Error('Rate limited');
+                }
+            }
+            catch(err) {
+                console.log(`call failed when fetching events from block ${startBlock} -> ${endBlock}, trying again`, err.toString())
+                startBlock -= currentStepSize // try again after sleepin
+                const newStepSize = Math.round(currentStepSize/2);
+                console.log(`Changing step size from ${currentStepSize} to ${newStepSize}`)
+                currentStepSize = newStepSize;
+                await sleep(5);
+                continue
+            }
+            
+            currentStepSize =  this.blockStepInInit;
+
             for(const e of allEvents){
                 const topics = e.raw.topics
                 const ilk = topics[ilkIndex]

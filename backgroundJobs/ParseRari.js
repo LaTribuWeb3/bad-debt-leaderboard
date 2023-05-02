@@ -8,7 +8,7 @@ class RariParser extends Compound {
     const compoundInfo = Addresses.rariTetranodeAddress
     const network = 'ETH'
     const web3 = new Web3(process.env.ETH_NODE_URL)
-    super(compoundInfo, network, web3, 24 * 5)
+    super(compoundInfo, network, web3, 24, 1, 'rari_ETH_users.json')
   }
 }
 
