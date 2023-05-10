@@ -394,9 +394,10 @@ class Compound {
 
         const colatBal = this.web3.eth.abi.decodeParameter('uint256', collateralBalaceResults[globalIndex].returnData);
         const borrowBal = this.web3.eth.abi.decodeParameter('uint256', borrowBalanceResults[globalIndex].returnData);
-
-        borrowBalances[market] = this.web3.utils.toBN(borrowBal);
-        collateralBalances[market] = this.web3.utils.toBN(colatBal);               
+        borrowBalances[market] = borrowBal.toString();
+        collateralBalances[market] = colatBal.toString();
+        // borrowBalances[market] = this.web3.utils.toB(borrowBal);
+        // collateralBalances[market] = this.web3.utils.toBN(colatBal);               
 
         globalIndex++;
       }
