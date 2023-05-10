@@ -61,7 +61,7 @@ const usdcAddress = {"ETH" : "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48", "BSC"
     "CRO": "0xc21223249CA28397B4B6541dfFaEcC539BfF0c59", "MOONBEAM" : "0x818ec0A7Fe18Ff94269904fCED6AE3DaE6d6dC0b" }
 
 const compoundAddress = { "ETH" : { "comptroller" : "0x3d9819210A31b4961b30EF54bE2aeD79B9c9Cd3B", "cETH" : "0x4Ddc2D193948926D02f9B1fE9e1daa0718270ED5",
-    "deployBlock" : 7710671, "blockStepInInit" : 50000, "multicallSize" : 200} }
+    "deployBlock" : 7710671, "blockStepInInit" : 50000, "multicallSize" : 400} }
 
 const compoundV3WethAddress = { "ETH" : { "comet" : "0xA17581A9E3356d9A858b789D68B4d866e593aE94",
     "deployBlock" : 16400710, "blockStepInInit" : 50000, "multicallSize" : 200} }

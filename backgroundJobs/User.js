@@ -23,8 +23,8 @@ class User {
                 this.borrowBalance[market] === undefined ) {
                     console.log("zero price for market", {market})
                     return { "netValue" : web3.utils.toBN("0"),
-                             "collateral" : web3.utils.toBN("0"),
-                             "debt" : web3.utils.toBN("0") }
+                            "collateral" : web3.utils.toBN("0"),
+                            "debt" : web3.utils.toBN("0") }
                 }
 
             const plus = web3.utils.toBN(this.collateralBalace[market]).mul(prices[market]).div(_1e18)

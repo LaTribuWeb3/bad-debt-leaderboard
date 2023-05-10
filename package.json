@@ -25,5 +25,8 @@
     "octokit": "^2.0.9",
     "os-utils": "^0.0.14",
     "web3": "^1.7.3"
+  },
+  "devDependencies": {
+    "eslint": "^8.40.0"
   }
 }
