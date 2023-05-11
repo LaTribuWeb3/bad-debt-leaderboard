@@ -19,8 +19,6 @@ ParseAaveV3_MATIC.js
 ParseAaveV3_Optimism.js
 ParseAgave.js
 ParseApeswap.js
-ParseAurigami.js
-ParseBastion.js
 ParseBenqi.js
 ParseCompoundV3USDC.js
 ParseCompoundV3WETH.js
@@ -40,8 +38,6 @@ ParseRari.js
 ParseRikki.js
 ParseTectonic.js
 ParseTraderJoe.js
-ParseVenus.js
 PriceAddresses.js
-priceFetcher.js
 User.js
 nocommit/*
