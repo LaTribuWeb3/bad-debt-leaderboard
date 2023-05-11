@@ -73,13 +73,13 @@ const rariTetranodeAddress = { "ETH" : { "comptroller" : "0x814b02C1ebc9164972D8
     "deployBlock" : 12860109, "blockStepInInit" : 50000, "multicallSize" : 500}}
 
 const venusAddress = { "BSC" : { "comptroller" : "0xfD36E2c2a6789Db23113685031d7F16329158384", "cETH" : "0xA07c5b74C9B40447a954e1466938b865b6BBea36",
-    "deployBlock" : 2471512, "blockStepInInit" : 5000, "multicallSize" : 20}}
+    "deployBlock" : 2471512, "blockStepInInit" : 50000, "multicallSize" : 200}}
 
 const traderJoeAddress = { "AVAX" : { "comptroller" : "0xdc13687554205E5b89Ac783db14bb5bba4A1eDaC", "cETH" : "0xdc13687554205E5b89Ac783db14bb5bba4A1eDaC",
     "deployBlock" : 5449252, "blockStepInInit" : 2048, "multicallSize" : 100}}
 
 const benqiAddress = { "AVAX" : { "comptroller" : "0x486Af39519B4Dc9a7fCcd318217352830E8AD9b4", "cETH" : "0x5C0401e81Bc07Ca70fAD469b451682c0d747Ef1c",
-    "deployBlock" : 3046286, "blockStepInInit" : 2048, "multicallSize" : 100}}
+    "deployBlock" : 3046286, "blockStepInInit" : 2048, "multicallSize" : 200}}
 
 const ironBankAddress = { "ETH" : { "comptroller" : "0xAB1c342C7bf5Ec5F02ADEA1c2270670bCa144CbB", "cETH" : "0xAB1c342C7bf5Ec5F02ADEA1c2270670bCa144CbB",
     "deployBlock" : 11384868, "blockStepInInit" : 50000, "multicallSize" : 100}}    
@@ -88,7 +88,7 @@ const ovixAddress = { "MATIC" : { "comptroller" : "0x8849f1a0cB6b5D6076aB150546E
     "deployBlock" : 26312398, "blockStepInInit" : 10000, "multicallSize" : 100}}
     
 const bastionAddress = { "NEAR" : { "comptroller": "0x6De54724e128274520606f038591A00C5E94a1F6", "cETH": "0x4E8fE8fd314cFC09BDb0942c5adCC37431abDCD0",    
-    "deployBlock" : 60837829, "blockStepInInit" : 10000, "multicallSize" : 20}}
+    "deployBlock" : 60837829, "blockStepInInit" : 10000, "multicallSize" : 200}}
 
 const apeSwapAddress = { "BSC" : { "comptroller" : "0xAD48B2C9DC6709a560018c678e918253a65df86e", "cETH" : "0x34878F6a484005AA90E7188a546Ea9E52b538F6f",
     "deployBlock" :  12871489, "blockStepInInit" : 50000, "multicallSize" : 20}}
@@ -118,7 +118,7 @@ const aurigamiAddress = {
         "cETH": "0xca9511B610bA5fc7E311FDeF9cE16050eE4449E9",
         "deployBlock": 60501454,
         "blockStepInInit": 10000,
-        "multicallSize": 20
+        "multicallSize": 200
     }
 }
 

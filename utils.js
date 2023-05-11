@@ -8,18 +8,12 @@ const sleep = async seconds => {
 };
 
 let startDate = 0;
+const formatMemoryUsage = (data) => `${Math.round(data / 1024 / 1024)} MB`;
 
 function displayMemoryUsage() {
-  const formatMemoryUsage = (data) => `${Math.round(data / 1024 / 1024)} MB`;
 
   const memoryData = process.memoryUsage();
 
-  const memoryUsage = {
-    rss: `${formatMemoryUsage(memoryData.rss)} -> Resident Set Size - total memory allocated for the process execution`,
-    heapTotal: `${formatMemoryUsage(memoryData.heapTotal)} -> total size of the allocated heap`,
-    heapUsed: `${formatMemoryUsage(memoryData.heapUsed)} -> actual memory used during the execution`,
-    external: `${formatMemoryUsage(memoryData.external)} -> V8 external memory`,
-  };
 
   const filename = process.argv[1].split('\\').at(-1);
 
@@ -27,7 +21,13 @@ function displayMemoryUsage() {
     startDate = Date.now();
     fs.writeFileSync(`${filename}-memoryusage.log`, 'runtime (sec), Resident Set Size - total memory allocated for the process execution,total size of the allocated heap,actual memory used during the execution, V8 external memory\n');
   }
-
+  
+  // const memoryUsage = {
+  //   rss: `${formatMemoryUsage(memoryData.rss)} -> Resident Set Size - total memory allocated for the process execution`,
+  //   heapTotal: `${formatMemoryUsage(memoryData.heapTotal)} -> total size of the allocated heap`,
+  //   heapUsed: `${formatMemoryUsage(memoryData.heapUsed)} -> actual memory used during the execution`,
+  //   external: `${formatMemoryUsage(memoryData.external)} -> V8 external memory`,
+  // };
   // console.log(memoryUsage);
   fs.appendFileSync(`${filename}-memoryusage.log`, `${Math.round((Date.now() - startDate)/1000)},${memoryData.rss},${memoryData.heapTotal},${memoryData.heapUsed},${memoryData.external}\n`);
 }
@@ -108,5 +108,6 @@ module.exports = {
   retry,
   displayMemoryUsage,
   loadUserListFromDisk,
-  saveUserListToDisk
+  saveUserListToDisk,
+  formatMemoryUsage
 };

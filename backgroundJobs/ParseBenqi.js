@@ -12,4 +12,11 @@ class BenqiParser extends Compound {
   }
 }
 
+// async function test() {
+//   const parser = new BenqiParser();
+//   await parser.main();
+// }
+
+// test();
+
 module.exports = { Parser: BenqiParser }

@@ -24,12 +24,14 @@ function normalize(amount, decimals) {
  * @param {string[]} argNames 
  * @param {number} startBlock 
  * @param {number} targetBlock 
+ * @param {number} targetEventCount the amount of events we aim to fetch each call, allowing to dynamically change the block range when calling the RPC
  * @returns {Promise<string[]>}
  */
-async function fetchAllEventsAndExtractStringArray(contract, contractName, eventName, argNames, startBlock, targetBlock) {
+async function fetchAllEventsAndExtractStringArray(contract, contractName, eventName, argNames, startBlock, targetBlock, targetEventCount = 8000) {
   const extractedArray = [];
+  const logPrefix = `fetchAllEvents[${contractName}-${eventName}-${argNames.join(',')}]`;
 
-  console.log(`fetchAllEvents[${contractName}-${eventName}-${argNames.join(',')}]: will fetch events for ${targetBlock - startBlock + 1} blocks`);
+  console.log(`${logPrefix}: will fetch events for ${targetBlock - startBlock + 1} blocks`);
   const initBlockStep = 50000;
   let blockStep = initBlockStep;
   let fromBlock = startBlock;
@@ -60,13 +62,13 @@ async function fetchAllEventsAndExtractStringArray(contract, contractName, event
       continue;
     }
 
-    console.log(`fetchAllEvents[${contractName}-${eventName}-${argNames.join(',')}]: [${fromBlock} - ${toBlock}] found ${events.length} events after ${cptError} errors (fetched ${toBlock-fromBlock+1} blocks). Current results: ${extractedArray.length}`);
+    console.log(`${logPrefix}: [${fromBlock} - ${toBlock}] found ${events.length} events after ${cptError} errors (fetched ${toBlock-fromBlock+1} blocks). Current results: ${extractedArray.length}`);
 
     if(events.length != 0) {
       for(const e of events) {
         for(const argName of argNames) {
           const a = e.returnValues[argName].toString();
-          if(! extractedArray.includes(a)) {
+          if(!extractedArray.includes(a)) {
             extractedArray.push(a);
           } 
         }
@@ -75,7 +77,7 @@ async function fetchAllEventsAndExtractStringArray(contract, contractName, event
       // try to find the blockstep to reach 8000 events per call as the RPC limit is 10 000, 
       // this try to change the blockstep by increasing it when the pool is not very used
       // or decreasing it when the pool is very used
-      blockStep = Math.min(1_000_000, Math.round(blockStep * 8000 / events.length));
+      blockStep = Math.min(1_000_000, Math.round(blockStep * targetEventCount / events.length));
       cptError = 0;
     } else {
       // if 0 events, multiply blockstep by 4
@@ -84,7 +86,7 @@ async function fetchAllEventsAndExtractStringArray(contract, contractName, event
     fromBlock = toBlock +1;
   }
 
-  console.log(`fetchAllEvents[${contractName}-${eventName}-${argNames.join(',')}]: found ${extractedArray.length} ${argNames.join(',')} in range [${startBlock} ${targetBlock}]`);
+  console.log(`${logPrefix}: found ${extractedArray.length} ${argNames.join(',')} in range [${startBlock} ${targetBlock}]`);
   return extractedArray;
 }
 

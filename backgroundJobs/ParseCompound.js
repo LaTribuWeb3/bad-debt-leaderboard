@@ -1,4 +1,4 @@
-const { displayMemoryUsage } = require('../utils.js');
+// const { displayMemoryUsage } = require('../utils.js');
 const Addresses = require('./Addresses.js');
 const Compound = require('./CompoundParser');
 const Web3 = require('web3');
@@ -13,12 +13,12 @@ class CompoundParser extends Compound {
   }
 }
 
-async function test() {
-  setInterval(() => displayMemoryUsage(), 10000);
-  const parser = new CompoundParser();
-  await parser.main();
-}
+// async function test() {
+//   setInterval(() => displayMemoryUsage(), 10000);
+//   const parser = new CompoundParser();
+//   await parser.main();
+// }
 
-test();
+// test();
 
 module.exports = { Parser: CompoundParser };

@@ -65,8 +65,8 @@ class Compound {
     await this.updateAllUsers();
   }
 
-  async lightUpdate() {
-    await this.periodicUpdateUsers(this.lastUpdateBlock);
+  async lightUpdate(currBlock) {
+    await this.periodicUpdateUsers(this.lastUpdateBlock, currBlock);
   }
 
   async main() {
@@ -94,7 +94,7 @@ class Compound {
       await this.calcBadDebt(currTime);
             
       console.log(`bad debt: ${normalize(this.output.total, 18)}`);
-      console.log(`tvl : ${normalize(this.output.tvl, 18)}`);
+      console.log(`tvl: ${normalize(this.output.tvl, 18)}`);
       this.lastUpdateBlock = currBlock;
 
       // don't  increase cntr, this way if heavy update is needed, it will be done again next time
@@ -179,53 +179,43 @@ class Compound {
   }
 
 
-  async getPastEventsInSteps(cToken, key, from, to){
-    let totalEvents = [];
-    for (let i = from; i < to; i = i + this.blockStepInInit) {
-      const fromBlock = i;
-      const toBlock = i + this.blockStepInInit > to ? to : i + this.blockStepInInit;
-      const fn = (...args) => cToken.getPastEvents(...args);
-      const events = await retry(fn, [key, {fromBlock, toBlock}]);
-      totalEvents = totalEvents.concat(events);
-    }
-    return totalEvents;
-  }
+  // async getPastEventsInSteps(cToken, key, from, to){
+  //   let totalEvents = [];
+  //   for (let i = from; i < to; i = i + this.blockStepInInit) {
+  //     const fromBlock = i;
+  //     const toBlock = i + this.blockStepInInit > to ? to : i + this.blockStepInInit;
+  //     const fn = (...args) => cToken.getPastEvents(...args);
+  //     const events = await retry(fn, [key, {fromBlock, toBlock}]);
+  //     totalEvents = totalEvents.concat(events);
+  //   }
+  //   return totalEvents;
+  // }
 
-  async periodicUpdateUsers(lastUpdatedBlock) {
-    const accountsToUpdate = [];
-    const currBlock = await this.web3.eth.getBlockNumber() - 10;
+  async periodicUpdateUsers(lastUpdatedBlock, currBlock) {
+    let accountsToUpdate = [];
     console.log({currBlock});
 
-    const events = {'Mint' : ['minter'],
+    const events = {
+      'Mint' : ['minter'],
       'Redeem' : ['redeemer'],
       'Borrow' : ['borrower'],
       'RepayBorrow' : ['borrower'],
       'LiquidateBorrow' : ['liquidator','borrower'],
-      'Transfer' : ['from', 'to'] };
+      'Transfer' : ['from', 'to']
+    };
 
     for(const market of this.markets) {
       const ctoken = new this.web3.eth.Contract(Addresses.cTokenAbi, market);
-      const keys = Object.keys(events);
-      console.log({keys});
-      for (const key of keys) {
-        const value = events[key];
-        console.log({key}, {value});
-        const newEvents = await this.getPastEventsInSteps(ctoken, key, lastUpdatedBlock, currBlock); 
-        for(const e of newEvents) {
-          for(const field of value) {
-            console.log({field});
-            const a = e.returnValues[field];
-            console.log({a});
-            if(! accountsToUpdate.includes(a)) accountsToUpdate.push(a);
-          }
-        }
+      for(const [eventName, eventArgs] of Object.entries(events)) {
+        console.log(`periodicUpdateUsers: Fetching new events for market ${market}, event name: ${eventName}, args: ${eventArgs.join(', ')}`);
+        const fetchedAccounts = await fetchAllEventsAndExtractStringArray(ctoken, 'CTOKEN', eventName, eventArgs, lastUpdatedBlock, currBlock);
+        // merge with accountsToUpdate
+        accountsToUpdate = Array.from(new Set(accountsToUpdate.concat(fetchedAccounts)));
       }
     }
 
-    console.log({accountsToUpdate});
-    for(const a of accountsToUpdate) {
-      if(! this.userList.includes(a)) this.userList.push(a);            
-    }
+    console.log(`periodicUpdateUsers: will update ${accountsToUpdate.length} users`);
+
     // updating users in slices
     const bulkSize = this.multicallSize;
     for (let i = 0; i < accountsToUpdate.length; i = i + bulkSize) {
@@ -310,7 +300,7 @@ class Compound {
     }
 
     this.output = { 'total' :  this.sumOfBadDebt.toString(), 'updated' : currTime.toString(), 'decimals' : '18', 'users' : userWithBadDebt,
-      'tvl' : this.tvl.toString(), 'deposits' : '0', 'borrows' : '0',
+      'tvl' : this.tvl.toString(), 'deposits' : '-1', 'borrows' : '-1',
       'calculatedBorrows' : this.totalBorrows.toString()};
 
     console.log(JSON.stringify(this.output));
@@ -409,6 +399,12 @@ class Compound {
           this.web3.utils.toBN(userNetValue.debt).eq(this.web3.utils.toBN('0'))) {
         // console.log(`user ${user} has 0 collateral and debt, will not save it`);
         this.cptUserZeroNetValue++;
+
+        // if an user had some collateral and debt but not anymore, deleting it
+        if(this.users[user]) {
+          delete this.users[user];
+        }
+
       } else {
         this.users[user] = userData;
       }
