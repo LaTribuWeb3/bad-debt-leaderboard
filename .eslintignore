@@ -4,7 +4,6 @@ server.js
 AaveParser.js
 AaveV3Parser.js
 Addresses.js
-BSCParser.js
 CompoundV3Parser.js
 jobRuner.js
 MakerParser.js

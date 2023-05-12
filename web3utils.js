@@ -1,4 +1,5 @@
 const Web3 = require('web3');
+const { sleep } = require('./utils');
 const { toBN, fromWei } = Web3.utils;
 
 function normalize(amount, decimals) {
@@ -24,15 +25,15 @@ function normalize(amount, decimals) {
  * @param {string[]} argNames 
  * @param {number} startBlock 
  * @param {number} targetBlock 
- * @param {number} targetEventCount the amount of events we aim to fetch each call, allowing to dynamically change the block range when calling the RPC
+ * @param {number} blockStepLimit some rpc have a strict limit, use this number as fixed blockstep when defined
  * @returns {Promise<string[]>}
  */
-async function fetchAllEventsAndExtractStringArray(contract, contractName, eventName, argNames, startBlock, targetBlock, targetEventCount = 8000) {
+async function fetchAllEventsAndExtractStringArray(contract, contractName, eventName, argNames, startBlock, targetBlock, blockStepLimit = undefined) {
   const extractedArray = [];
   const logPrefix = `fetchAllEvents[${contractName}-${eventName}-${argNames.join(',')}]`;
 
   console.log(`${logPrefix}: will fetch events for ${targetBlock - startBlock + 1} blocks`);
-  const initBlockStep = 50000;
+  const initBlockStep = blockStepLimit || 50000;
   let blockStep = initBlockStep;
   let fromBlock = startBlock;
   let toBlock = 0;
@@ -55,10 +56,11 @@ async function fetchAllEventsAndExtractStringArray(contract, contractName, event
       }
       toBlock = 0;
       cptError++;
-      if(cptError >= 10) {
+      if(cptError >= 15) {
         console.log(`getPastEvents error: ${e.toString()}`);
         throw e;
       }
+      await sleep(5000);
       continue;
     }
 
@@ -77,13 +79,17 @@ async function fetchAllEventsAndExtractStringArray(contract, contractName, event
       // try to find the blockstep to reach 8000 events per call as the RPC limit is 10 000, 
       // this try to change the blockstep by increasing it when the pool is not very used
       // or decreasing it when the pool is very used
-      blockStep = Math.min(1_000_000, Math.round(blockStep * targetEventCount / events.length));
+      blockStep = Math.min(1_000_000, Math.round(blockStep * 8000 / events.length));
       cptError = 0;
     } else {
       // if 0 events, multiply blockstep by 4
       blockStep = blockStep * 4;
     }
     fromBlock = toBlock +1;
+
+    if(blockStepLimit) {
+      blockStep = blockStepLimit;
+    }
   }
 
   console.log(`${logPrefix}: found ${extractedArray.length} ${argNames.join(',')} in range [${startBlock} ${targetBlock}]`);

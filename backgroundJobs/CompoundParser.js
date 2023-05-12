@@ -19,7 +19,7 @@ class Compound {
   constructor(compoundInfo, network, web3, heavyUpdateInterval = 24, fetchDelayInHours = 1) {
     this.runnerName = `${this.constructor.name}-Runner`;
     console.log(`runner name: ${this.runnerName}`);
-    this.userListFileName = `${this.runnerName}-userlist.csv`;
+    this.userListFileName = `${this.runnerName}-userlist.json`;
     this.web3 = web3;
     this.network = network;
     this.comptroller = new web3.eth.Contract(Addresses.comptrollerAbi, compoundInfo[network].comptroller);
@@ -58,6 +58,11 @@ class Compound {
 
     this.output = {};
     this.fetchDelayInHours = fetchDelayInHours;
+    if(compoundInfo[network].blockStepLimit) {
+      this.blockStepLimit = compoundInfo[network].blockStepLimit;
+    } else {
+      this.blockStepLimit = undefined;
+    }
   }
 
   async heavyUpdate(currBlock) {
@@ -208,7 +213,7 @@ class Compound {
       const ctoken = new this.web3.eth.Contract(Addresses.cTokenAbi, market);
       for(const [eventName, eventArgs] of Object.entries(events)) {
         console.log(`periodicUpdateUsers: Fetching new events for market ${market}, event name: ${eventName}, args: ${eventArgs.join(', ')}`);
-        const fetchedAccounts = await fetchAllEventsAndExtractStringArray(ctoken, 'CTOKEN', eventName, eventArgs, lastUpdatedBlock, currBlock);
+        const fetchedAccounts = await fetchAllEventsAndExtractStringArray(ctoken, 'CTOKEN', eventName, eventArgs, lastUpdatedBlock, currBlock, this.blockStepLimit);
         // merge with accountsToUpdate
         accountsToUpdate = Array.from(new Set(accountsToUpdate.concat(fetchedAccounts)));
       }
@@ -238,7 +243,7 @@ class Compound {
       this.userList = loadedUserListItem.userList;
     }
 
-    const newUserList =  await fetchAllEventsAndExtractStringArray(this.comptroller, 'Comptroller', 'MarketEntered', ['account'], startBlock, currBlock);
+    const newUserList =  await fetchAllEventsAndExtractStringArray(this.comptroller, 'Comptroller', 'MarketEntered', ['account'], startBlock, currBlock, this.blockStepLimit);
     console.log(`Found ${newUserList.length} users since block ${startBlock}`);
     this.userList = Array.from(new Set(this.userList.concat(newUserList)));
 
