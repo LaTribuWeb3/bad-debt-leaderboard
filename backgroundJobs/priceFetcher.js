@@ -13,7 +13,8 @@ const coinGeckoChainIdMap = {
   MATIC: 'polygon-pos',
   BSC: 'binance-smart-chain',
   NEAR: 'aurora',
-  CRO: 'cronos'
+  CRO: 'cronos',
+  OPTIMISM: 'optimistic-ethereum',
 };
 
 const getChainlinkPrice = async (web3, feedAddress) => {
@@ -220,10 +221,16 @@ const specialAssetPriceFetchers = {
   CRO_0x87EFB3ec1576Dec8ED47e58B832bEdCd86eE186e: async (web3, network, address) => {
     // fetch TUSD price from coingecko simple price API
     const coingeckoCall = 'https://api.coingecko.com/api/v3/simple/price?ids=true-usd&vs_currencies=USD';
-
-    const {data} = await retry(axios.get, [coingeckoCall]);
-    const apiPrice = Object.values(data)[0].usd || 0;
-    return apiPrice;    
+    const {data} = await retry(axios.get, [coingeckoCall])
+    const apiPrice = Object.values(data)[0].usd || 0
+    return apiPrice    
+  },
+  OPTIMISM_0x1DB2466d9F5e10D7090E7152B68d62703a2245F0: async (web3, network, address) => {
+    // SONNE
+    const coingeckoCall = "https://api.coingecko.com/api/v3/simple/price?ids=sonne-finance&vs_currencies=USD"
+    const {data} = await retry(axios.get, [coingeckoCall])
+    const apiPrice = Object.values(data)[0].usd || 0
+    return apiPrice
   }
 };
 
