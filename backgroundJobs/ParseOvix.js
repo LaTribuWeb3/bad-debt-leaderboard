@@ -12,4 +12,12 @@ class OvixParser extends Compound {
   }
 }
 
+
+// async function test() {
+//   const parser = new OvixParser();
+//   await parser.main();
+// }
+
+// test();
+
 module.exports = { Parser: OvixParser }

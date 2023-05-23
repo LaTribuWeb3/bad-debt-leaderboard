@@ -23,7 +23,7 @@ class Compound {
     this.web3 = web3;
     this.network = network;
     this.comptroller = new web3.eth.Contract(Addresses.comptrollerAbi, compoundInfo[network].comptroller);
-    this.cptUserZeroNetValue = 0;
+    this.cptUserZeroValue = 0;
 
     this.cETHAddresses = [compoundInfo[network].cETH];
     if(compoundInfo[network].cETH2) this.cETHAddresses.push(compoundInfo[network].cETH2);
@@ -76,7 +76,7 @@ class Compound {
 
   async main() {
     try {
-      this.cptUserZeroNetValue = 0;
+      this.cptUserZeroValue = 0;
       await waitForCpuToGoBelowThreshold();
       await this.initPrices();
                         
@@ -89,7 +89,7 @@ class Compound {
       if(this.mainCntr % this.heavyUpdateInterval == 0) {
         console.log('heavyUpdate start');
         await this.heavyUpdate(currBlock);
-        console.log(`heavyUpdate success, users with 0 net value: ${this.cptUserZeroNetValue} / ${this.userList.length}`);
+        console.log(`heavyUpdate success, users with 0 net value: ${this.cptUserZeroValue} / ${this.userList.length}`);
       } else {
         console.log('lightUpdate start');
         await this.lightUpdate(currBlock);
@@ -403,7 +403,7 @@ class Compound {
       if( this.web3.utils.toBN(userNetValue.collateral).eq(this.web3.utils.toBN('0')) &&
           this.web3.utils.toBN(userNetValue.debt).eq(this.web3.utils.toBN('0'))) {
         // console.log(`user ${user} has 0 collateral and debt, will not save it`);
-        this.cptUserZeroNetValue++;
+        this.cptUserZeroValue++;
 
         // if an user had some collateral and debt but not anymore, deleting it
         if(this.users[user]) {

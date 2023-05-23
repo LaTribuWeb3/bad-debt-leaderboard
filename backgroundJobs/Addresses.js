@@ -70,7 +70,7 @@ const compoundV3UsdcAddress = { "ETH" : { "comet" : "0xc3d688B66703497DAA19211EE
     "deployBlock" : 15331586, "blockStepInInit" : 50000, "multicallSize" : 200} }
 
 const rariTetranodeAddress = { "ETH" : { "comptroller" : "0x814b02C1ebc9164972D888495927fe1697F0Fb4c", "cETH" : "0xF6551C22276b9Bf62FaD09f6bD6Cad0264b89789",
-    "deployBlock" : 12860109, "blockStepInInit" : 50000, "multicallSize" : 500}}
+    "deployBlock" : 12860109, "blockStepInInit" : 50000, "multicallSize" : 200}}
 
 const venusAddress = { "BSC" : { "comptroller" : "0xfD36E2c2a6789Db23113685031d7F16329158384", "cETH" : "0xA07c5b74C9B40447a954e1466938b865b6BBea36",
     "deployBlock" : 2471512, "blockStepInInit" : 50000, "multicallSize" : 100, "blockStepLimit": 1024}}
@@ -79,7 +79,7 @@ const traderJoeAddress = { "AVAX" : { "comptroller" : "0xdc13687554205E5b89Ac783
     "deployBlock" : 5449252, "blockStepInInit" : 2048, "multicallSize" : 100}}
 
 const benqiAddress = { "AVAX" : { "comptroller" : "0x486Af39519B4Dc9a7fCcd318217352830E8AD9b4", "cETH" : "0x5C0401e81Bc07Ca70fAD469b451682c0d747Ef1c",
-    "deployBlock" : 3046286, "blockStepInInit" : 2048, "multicallSize" : 200}}
+    "deployBlock" : 3046286, "blockStepInInit" : 2048, "multicallSize" : 100}}
 
 const ironBankAddress = { "ETH" : { "comptroller" : "0xAB1c342C7bf5Ec5F02ADEA1c2270670bCa144CbB", "cETH" : "0xAB1c342C7bf5Ec5F02ADEA1c2270670bCa144CbB",
     "deployBlock" : 11384868, "blockStepInInit" : 50000, "multicallSize" : 100}}    

@@ -33,8 +33,7 @@ async function fetchAllEventsAndExtractStringArray(contract, contractName, event
   const logPrefix = `fetchAllEvents[${contractName}-${eventName}-${argNames.join(',')}]`;
 
   console.log(`${logPrefix}: will fetch events for ${targetBlock - startBlock + 1} blocks`);
-  const initBlockStep = blockStepLimit || 50000;
-  let blockStep = initBlockStep;
+  let blockStep = blockStepLimit || 10000;
   let fromBlock = startBlock;
   let toBlock = 0;
   let cptError = 0;
@@ -64,7 +63,6 @@ async function fetchAllEventsAndExtractStringArray(contract, contractName, event
       continue;
     }
 
-    console.log(`${logPrefix}: [${fromBlock} - ${toBlock}] found ${events.length} events after ${cptError} errors (fetched ${toBlock-fromBlock+1} blocks). Current results: ${extractedArray.length}`);
 
     if(events.length != 0) {
       for(const e of events) {
@@ -79,12 +77,21 @@ async function fetchAllEventsAndExtractStringArray(contract, contractName, event
       // try to find the blockstep to reach 8000 events per call as the RPC limit is 10 000, 
       // this try to change the blockstep by increasing it when the pool is not very used
       // or decreasing it when the pool is very used
-      blockStep = Math.min(1_000_000, Math.round(blockStep * 8000 / events.length));
+      // in any case, should not set the new blockstep to more than 2 times the old one
+      const newBlockStep = Math.min(1_000_000, Math.round(blockStep * 8000 / events.length));
+      if(newBlockStep > blockStep * 2) {
+        blockStep = blockStep * 2;
+      } else {
+        blockStep = newBlockStep;
+      }
       cptError = 0;
     } else {
-      // if 0 events, multiply blockstep by 4
-      blockStep = blockStep * 4;
+      // if 0 events, multiply blockstep by 2
+      blockStep = blockStep * 2 ;
     }
+
+    console.log(`${logPrefix}: [${fromBlock} - ${toBlock}] found ${events.length} events after ${cptError} errors (fetched ${toBlock-fromBlock+1} blocks). Current results: ${extractedArray.length}`);
+
     fromBlock = toBlock +1;
 
     if(blockStepLimit) {

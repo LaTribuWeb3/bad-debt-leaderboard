@@ -12,4 +12,11 @@ class RariParser extends Compound {
   }
 }
 
+// async function test() {
+//   const parser = new RariParser();
+//   await parser.main();
+// }
+
+// test();
+
 module.exports = { Parser: RariParser }
